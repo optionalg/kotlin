@@ -34,7 +34,7 @@ import org.jetbrains.jet.lang.resolve.java.AnalyzerFacadeForJVM;
 import org.jetbrains.jet.lang.types.ErrorUtils;
 import org.jetbrains.jet.test.TestCaseWithTmpdir;
 import org.jetbrains.jet.test.util.DescriptorValidator;
-import org.jetbrains.jet.test.util.NamespaceComparator;
+import org.jetbrains.jet.test.util.RecursiveDescriptorComparator;
 import org.jetbrains.jet.utils.ExceptionUtils;
 
 import java.io.BufferedOutputStream;
@@ -46,7 +46,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipOutputStream;
 
-import static org.jetbrains.jet.test.util.NamespaceComparator.validateAndCompareNamespaceWithFile;
+import static org.jetbrains.jet.test.util.RecursiveDescriptorComparator.validateAndCompareDescriptorWithFile;
 
 public class CompileKotlinAgainstCustomBinariesTest extends TestCaseWithTmpdir {
     public static final String TEST_DATA_PATH = "compiler/testData/compileKotlinAgainstCustomBinaries/";
@@ -66,10 +66,11 @@ public class CompileKotlinAgainstCustomBinariesTest extends TestCaseWithTmpdir {
 
         NamespaceDescriptor namespace = analyzeFileToNamespace(ktFile, extraClassPath);
 
-        NamespaceComparator.Configuration comparator = NamespaceComparator.DONT_INCLUDE_METHODS_OF_OBJECT.withValidationStrategy(
-                DescriptorValidator.ValidationVisitor.ALLOW_ERROR_TYPES);
+        RecursiveDescriptorComparator.Configuration comparator =
+                RecursiveDescriptorComparator.DONT_INCLUDE_METHODS_OF_OBJECT.withValidationStrategy(
+                        DescriptorValidator.ValidationVisitor.ALLOW_ERROR_TYPES);
         File txtFile = new File(getTestDataDirectory(), FileUtil.getNameWithoutExtension(ktFile) + ".txt");
-        validateAndCompareNamespaceWithFile(namespace, comparator, txtFile);
+        validateAndCompareDescriptorWithFile(namespace, comparator, txtFile);
     }
 
     @NotNull
