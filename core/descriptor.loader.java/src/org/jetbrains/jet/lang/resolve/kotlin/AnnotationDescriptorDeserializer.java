@@ -114,8 +114,8 @@ public class AnnotationDescriptorDeserializer implements AnnotationDeserializer 
         if (descriptor instanceof ClassDescriptor) {
             return kotlinClassFinder.find(kotlinFqNameToJavaFqName(naiveKotlinFqName((ClassDescriptor) descriptor)));
         }
-        else if (descriptor instanceof NamespaceDescriptor) {
-            return kotlinClassFinder.find(PackageClassUtils.getPackageClassFqName(DescriptorUtils.getFQName(descriptor).toSafe()));
+        else if (descriptor instanceof PackageFragmentDescriptor) {
+            return kotlinClassFinder.find(PackageClassUtils.getPackageClassFqName(((PackageFragmentDescriptor) descriptor).getFqName()));
         }
         else {
             throw new IllegalStateException("Unrecognized descriptor: " + descriptor);
@@ -259,8 +259,8 @@ public class AnnotationDescriptorDeserializer implements AnnotationDeserializer 
             @NotNull NameResolver nameResolver,
             @NotNull AnnotatedCallableKind kind
     ) {
-        if (container instanceof NamespaceDescriptor) {
-            return loadPackageFragmentClassFqName((NamespaceDescriptor) container, proto, nameResolver);
+        if (container instanceof PackageFragmentDescriptor) {
+            return loadPackageFragmentClassFqName((PackageFragmentDescriptor) container, proto, nameResolver);
         }
         else if (isClassObject(container) && isStaticFieldInOuter(proto)) {
             // Backing fields of properties of a class object are generated in the outer class
@@ -282,7 +282,7 @@ public class AnnotationDescriptorDeserializer implements AnnotationDeserializer 
 
     @Nullable
     private KotlinJvmBinaryClass loadPackageFragmentClassFqName(
-            @NotNull NamespaceDescriptor container,
+            @NotNull PackageFragmentDescriptor container,
             @NotNull ProtoBuf.Callable proto,
             @NotNull NameResolver nameResolver
     ) {

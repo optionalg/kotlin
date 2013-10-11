@@ -73,7 +73,12 @@ public class GenerationState {
     @Nullable
     private List<ScriptDescriptor> earlierScriptsForReplInterpreter;
 
-    public GenerationState(Project project, ClassBuilderFactory builderFactory, BindingContext bindingContext, List<JetFile> files) {
+    public GenerationState(
+            @NotNull Project project,
+            @NotNull ClassBuilderFactory builderFactory,
+            @NotNull BindingContext bindingContext,
+            @NotNull List<JetFile> files
+    ) {
         this(project, builderFactory, Progress.DEAF, bindingContext, files, true, false, true);
     }
 

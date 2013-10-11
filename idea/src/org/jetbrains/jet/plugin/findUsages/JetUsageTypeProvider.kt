@@ -31,7 +31,7 @@ import org.jetbrains.jet.lang.resolve.BindingContext
 import org.jetbrains.jet.lexer.JetTokens
 import org.jetbrains.jet.plugin.project.AnalyzerFacadeWithCache
 import org.jetbrains.jet.plugin.JetBundle
-import org.jetbrains.jet.lang.resolve.java.descriptor.JavaNamespaceDescriptor
+import org.jetbrains.jet.lang.resolve.java.descriptor.JavaPackageFragmentDescriptor
 
 public object JetUsageTypeProvider : UsageTypeProviderEx {
     public override fun getUsageType(element: PsiElement?): UsageType? {
@@ -179,7 +179,7 @@ public object JetUsageTypeProvider : UsageTypeProviderEx {
         val descriptor = bindingContext.get(BindingContext.REFERENCE_TARGET, reference)
 
         return when (descriptor) {
-            is ClassifierDescriptor, is JavaNamespaceDescriptor -> getClassUsageType()
+            is ClassifierDescriptor, is JavaPackageFragmentDescriptor -> getClassUsageType()
             is VariableDescriptor -> getVariableUsageType()
             is FunctionDescriptor -> getFunctionUsageType(descriptor)
             else -> null
