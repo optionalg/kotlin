@@ -238,7 +238,7 @@ public class DeserializedClassDescriptor extends AbstractClassDescriptor impleme
 
     @Nullable
     private ClassDescriptor computeClassObjectDescriptor() {
-        if (!classProto.getClassObjectPresent()) {
+        if (!classProto.hasClassObject()) {
             return null;
         }
 
@@ -254,7 +254,7 @@ public class DeserializedClassDescriptor extends AbstractClassDescriptor impleme
 
         if (getKind() == ClassKind.OBJECT) {
             ProtoBuf.Class.ClassObject classObjectProto = classProto.getClassObject();
-            if (classObjectProto == null || !classObjectProto.hasData()) {
+            if (!classObjectProto.hasData()) {
                 throw new IllegalStateException("Object should have a serialized class object: " + classId);
             }
 
