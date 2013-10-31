@@ -41,14 +41,14 @@ import org.jetbrains.jet.lang.descriptors.*;
 import org.jetbrains.jet.lang.psi.JetNamedFunction;
 import org.jetbrains.jet.lang.resolve.BindingContext;
 import org.jetbrains.jet.lang.resolve.java.JvmAbi;
-import org.jetbrains.jet.lang.resolve.name.Name;
 
 import java.util.*;
 
 import static org.jetbrains.asm4.Opcodes.*;
 import static org.jetbrains.jet.codegen.AsmUtil.*;
-import static org.jetbrains.jet.codegen.CodegenUtil.*;
 import static org.jetbrains.jet.codegen.JvmSerializationBindings.*;
+import static org.jetbrains.jet.codegen.CodegenUtil.isCallInsideSameClassAsDeclared;
+import static org.jetbrains.jet.codegen.CodegenUtil.isCallInsideSameModuleAsDeclared;
 import static org.jetbrains.jet.codegen.binding.CodegenBinding.asmTypeForAnonymousClass;
 import static org.jetbrains.jet.codegen.binding.CodegenBinding.isLocalNamedFun;
 import static org.jetbrains.jet.lang.resolve.BindingContextUtils.callableDescriptorToDeclaration;
@@ -262,10 +262,6 @@ public class FunctionCodegen extends ParentCodegenAwareImpl {
             @NotNull JvmMethodSignature signature,
             @NotNull FunctionGenerationStrategy strategy
     ) {
-        Collection<String> localVariableNames = new HashSet<String>(getParameterNamesAsStrings(functionDescriptor));
-
-        Map<Name, Label> labelsForSharedVars = new HashMap<Name, Label>();
-
         mv.visitCode();
 
         Label methodBegin = new Label();
@@ -281,15 +277,11 @@ public class FunctionCodegen extends ParentCodegenAwareImpl {
                 frameMap.enter(parameter, typeMapper.mapType(parameter));
             }
 
-            labelsForSharedVars.putAll(createSharedVarsForParameters(mv, functionDescriptor, frameMap));
-
             if (!JetTypeMapper.isAccessor(functionDescriptor)) {
                 genNotNullAssertionsForParameters(new InstructionAdapter(mv), state, functionDescriptor, frameMap);
             }
 
             strategy.generateBody(mv, signature, context, getParentCodegen());
-
-            localVariableNames.addAll(strategy.getLocalVariableNames());
         }
 
         Label methodEnd = new Label();
@@ -297,28 +289,16 @@ public class FunctionCodegen extends ParentCodegenAwareImpl {
 
 
         Type thisType = getThisTypeForFunction(functionDescriptor, context);
-        generateLocalVariableTable(mv, signature, functionDescriptor, thisType, methodBegin, methodEnd, localVariableNames, labelsForSharedVars, context.getContextKind());
+        generateLocalVariableTable(mv, signature, functionDescriptor, thisType, methodBegin, methodEnd, context.getContextKind());
     }
 
-    @NotNull
-    private static List<String> getParameterNamesAsStrings(@NotNull FunctionDescriptor functionDescriptor) {
-        List<ValueParameterDescriptor> parameters = functionDescriptor.getValueParameters();
-        List<String> result = new ArrayList<String>(parameters.size());
-        for (ValueParameterDescriptor parameter : parameters) {
-            result.add(parameter.getName().asString());
-        }
-        return result;
-    }
-
-    private void generateLocalVariableTable(
+    private static void generateLocalVariableTable(
             @NotNull MethodVisitor mv,
             @NotNull JvmMethodSignature jvmMethodSignature,
             @NotNull FunctionDescriptor functionDescriptor,
             @Nullable Type thisType,
             @NotNull Label methodBegin,
             @NotNull Label methodEnd,
-            @NotNull Collection<String> localVariableNames,
-            @NotNull Map<Name, Label> labelsForSharedVars,
             @NotNull OwnerKind ownerKind
     ) {
         Iterator<ValueParameterDescriptor> valueParameters = functionDescriptor.getValueParameters().iterator();
@@ -339,67 +319,23 @@ public class FunctionCodegen extends ParentCodegenAwareImpl {
         for (int i = 0; i < params.size(); i++) {
             JvmMethodParameterSignature param =  params.get(i);
             JvmMethodParameterKind kind = param.getKind();
-            String parameterName = "$" + param.getKind().name().toLowerCase();
+            String parameterName;
 
-            if (needIndexForVar(kind)) {
-                parameterName = parameterName + "$" + i;
+            if (kind == JvmMethodParameterKind.VALUE) {
+                ValueParameterDescriptor parameter = valueParameters.next();
+                parameterName = parameter.getName().asString();
+            }
+            else {
+                String lowercaseKind = kind.name().toLowerCase();
+                parameterName = needIndexForVar(kind)
+                                ? "$" + lowercaseKind + "$" + i
+                                : "$" + lowercaseKind;
             }
 
             Type type = param.getAsmType();
-            if (kind == JvmMethodParameterKind.VALUE) {
-                ValueParameterDescriptor parameter = valueParameters.next();
-                Label divideLabel = labelsForSharedVars.get(parameter.getName());
-                parameterName = parameter.getName().asString();
-                if (divideLabel != null) {
-                    mv.visitLocalVariable(parameterName, type.getDescriptor(), null, methodBegin, divideLabel, shift);
-
-                    String nameForSharedVar = createTmpVariableName(localVariableNames);
-                    localVariableNames.add(nameForSharedVar);
-
-                    Type sharedVarType = typeMapper.getSharedVarType(parameter);
-                    mv.visitLocalVariable(nameForSharedVar, sharedVarType.getDescriptor(), null, divideLabel, methodEnd, shift);
-                    shift += Math.max(type.getSize(), sharedVarType.getSize());
-                    continue;
-                }
-            }
-
             mv.visitLocalVariable(parameterName, type.getDescriptor(), null, methodBegin, methodEnd, shift);
             shift += type.getSize();
         }
-    }
-
-    @NotNull
-    private Map<Name, Label> createSharedVarsForParameters(
-            @NotNull MethodVisitor mv,
-            @NotNull FunctionDescriptor functionDescriptor,
-            @NotNull FrameMap frameMap
-    ) {
-        Map<Name, Label> labelsForSharedVars = new HashMap<Name, Label>();
-
-        for (ValueParameterDescriptor parameter : functionDescriptor.getValueParameters()) {
-            Type sharedVarType = typeMapper.getSharedVarType(parameter);
-            if (sharedVarType == null) {
-                continue;
-            }
-
-            Type localVarType = typeMapper.mapType(parameter);
-            int index = frameMap.getIndex(parameter);
-            mv.visitTypeInsn(NEW, sharedVarType.getInternalName());
-            mv.visitInsn(DUP);
-            mv.visitInsn(DUP);
-            mv.visitMethodInsn(INVOKESPECIAL, sharedVarType.getInternalName(), "<init>", "()V");
-            mv.visitVarInsn(localVarType.getOpcode(ILOAD), index);
-            mv.visitFieldInsn(PUTFIELD, sharedVarType.getInternalName(), "ref", StackValue.refType(localVarType).getDescriptor());
-
-            Label labelForSharedVar = new Label();
-            mv.visitLabel(labelForSharedVar);
-
-            labelsForSharedVars.put(parameter.getName(), labelForSharedVar);
-
-            mv.visitVarInsn(sharedVarType.getOpcode(ISTORE), index);
-        }
-
-        return labelsForSharedVars;
     }
 
     private static void generateStaticDelegateMethodBody(
@@ -425,7 +361,7 @@ public class FunctionCodegen extends ParentCodegenAwareImpl {
         iv.areturn(asmMethod.getReturnType());
     }
 
-    private boolean needIndexForVar(JvmMethodParameterKind kind) {
+    private static boolean needIndexForVar(JvmMethodParameterKind kind) {
         return kind == JvmMethodParameterKind.SHARED_VAR || kind == JvmMethodParameterKind.SUPER_CALL_PARAM;
     }
 
@@ -497,7 +433,7 @@ public class FunctionCodegen extends ParentCodegenAwareImpl {
         }
 
         for (Method overridden : bridgesToGenerate) {
-            generateBridge(owner, state, v, jvmSignature, functionDescriptor, overridden);
+            generateBridge(state, v, jvmSignature, functionDescriptor, overridden);
         }
     }
 
@@ -616,14 +552,13 @@ public class FunctionCodegen extends ParentCodegenAwareImpl {
         Iterator<ValueParameterDescriptor> iterator = paramDescrs.iterator();
 
         int countOfExtraVarsInMethodArgs = 0;
-        List<JvmMethodParameterSignature> params = signature.getKotlinParameterTypes();
 
-        for (int i = 0; i < params.size(); i++) {
-            JvmMethodParameterSignature parameterSignature = params.get(i);
+        for (JvmMethodParameterSignature parameterSignature : signature.getKotlinParameterTypes()) {
             if (parameterSignature.getKind() != JvmMethodParameterKind.VALUE) {
                 countOfExtraVarsInMethodArgs++;
                 frameMap.enterTemp(parameterSignature.getAsmType());
-            } else {
+            }
+            else {
                 frameMap.enter(iterator.next(), parameterSignature.getAsmType());
             }
         }
@@ -656,7 +591,7 @@ public class FunctionCodegen extends ParentCodegenAwareImpl {
             iv.load(frameMap.getIndex(parameterDescriptor), t);
         }
 
-        CallableMethod method = null;
+        CallableMethod method;
         if (functionDescriptor instanceof ConstructorDescriptor) {
             method = state.getTypeMapper().mapToCallableMethod((ConstructorDescriptor) functionDescriptor);
         } else {
@@ -686,9 +621,7 @@ public class FunctionCodegen extends ParentCodegenAwareImpl {
             var += ownerType.getSize();
         }
 
-        List<JvmMethodParameterSignature> params = signature.getKotlinParameterTypes();
-        for (int i = 0; i < params.size(); i++) {
-            JvmMethodParameterSignature parameterSignature = params.get(i);
+        for (JvmMethodParameterSignature parameterSignature : signature.getKotlinParameterTypes()) {
             if (parameterSignature.getKind() != JvmMethodParameterKind.VALUE) {
                 Type type = parameterSignature.getAsmType();
                 iv.load(var, type);
@@ -746,7 +679,6 @@ public class FunctionCodegen extends ParentCodegenAwareImpl {
     }
 
     private static void generateBridge(
-            CodegenContext owner,
             GenerationState state,
             ClassBuilder v,
             Method jvmSignature,

@@ -98,7 +98,6 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
     private final CodegenStatementVisitor statementVisitor;
 
     private final Stack<BlockStackElement> blockStackElements = new Stack<BlockStackElement>();
-    private final Collection<String> localVariableNames = new HashSet<String>();
 
     @Nullable
     private final MemberCodegen parentCodegen;
@@ -173,20 +172,10 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
         this.returnType = returnType;
         this.state = state;
         this.methodVisitor = v;
-        this.v = createInstructionAdapter(methodVisitor);
+        this.v = new InstructionAdapter(methodVisitor);
         this.bindingContext = state.getBindingContext();
         this.context = context;
         this.statementVisitor = new CodegenStatementVisitor(this);
-    }
-
-    protected InstructionAdapter createInstructionAdapter(MethodVisitor mv) {
-        return new InstructionAdapter(methodVisitor) {
-            @Override
-            public void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
-                super.visitLocalVariable(name, desc, signature, start, end, index);
-                localVariableNames.add(name);
-            }
-        };
     }
 
     public GenerationState getState() {
@@ -218,10 +207,6 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
 
     public BindingContext getBindingContext() {
         return bindingContext;
-    }
-
-    public Collection<String> getLocalVariableNamesForExpression() {
-        return localVariableNames;
     }
 
     @Nullable
