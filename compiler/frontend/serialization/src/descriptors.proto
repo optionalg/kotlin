@@ -120,8 +120,6 @@ message Class {
 
   optional bool class_object_present = 9 [default = false];
 
-  optional Callable primary_constructor_DEPRECATED = 10;
-
   repeated Callable member = 11;
 
   repeated int32 enum_entry = 12;
