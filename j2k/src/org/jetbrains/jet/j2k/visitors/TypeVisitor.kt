@@ -25,6 +25,9 @@ import org.jetbrains.jet.j2k.ast.types.*
 import java.util.LinkedList
 import com.intellij.openapi.util.text.StringUtil
 import java.util.ArrayList
+import org.jetbrains.jet.lang.resolve.java.JvmPrimitiveType
+
+private val PRIMITIVE_TYPES_NAMES = JvmPrimitiveType.values().map { it.getName() }
 
 public open class TypeVisitor(private val myConverter: Converter) : PsiTypeVisitor<Type>() {
     private var myResult: Type = EmptyType()
@@ -37,7 +40,7 @@ public open class TypeVisitor(private val myConverter: Converter) : PsiTypeVisit
         if (name == "void") {
             myResult = PrimitiveType(Identifier("Unit"))
         }
-        else if (Node.PRIMITIVE_TYPES.contains(name)) {
+        else if (PRIMITIVE_TYPES_NAMES.contains(name)) {
             myResult = PrimitiveType(Identifier(StringUtil.capitalize(name)))
         }
         else {

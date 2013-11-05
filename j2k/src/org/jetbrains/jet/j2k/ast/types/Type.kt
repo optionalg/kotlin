@@ -18,6 +18,8 @@ package org.jetbrains.jet.j2k.ast.types
 
 import org.jetbrains.jet.j2k.ast.Element
 
+public fun Type.isPrimitive(): Boolean = this is PrimitiveType
+
 public abstract class Type(val nullable: Boolean) : Element() {
     public open fun convertedToNotNull(): Type {
         if (nullable) throw UnsupportedOperationException("convertedToNotNull must be defined")
