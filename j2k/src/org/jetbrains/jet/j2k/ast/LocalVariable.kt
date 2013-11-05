@@ -23,7 +23,7 @@ public class LocalVariable(val identifier: Identifier,
                            val modifiersSet: Set<Modifier>,
                            val javaType: Type,
                            val initializer: Expression,
-                           val Conveterter: Converter) : Expression() {
+                           val converter: Converter) : Expression() {
 
     public fun isImmutable(): Boolean = forceImmutable || modifiersSet.contains(Modifier.FINAL)
 
