@@ -34,7 +34,7 @@ import org.jetbrains.jet.lang.resolve.BindingContext;
 import org.jetbrains.jet.lang.resolve.BindingContextUtils;
 import org.jetbrains.jet.lang.resolve.BindingTrace;
 import org.jetbrains.jet.lang.resolve.DescriptorUtils;
-import org.jetbrains.jet.lang.resolve.java.jetAsJava.JetClsMethod;
+import org.jetbrains.jet.lang.resolve.java.jetAsJava.JetPsiMethodWrapper;
 import org.jetbrains.jet.lang.resolve.java.mapping.JavaToKotlinClassMap;
 import org.jetbrains.jet.lang.resolve.java.resolver.DescriptorResolverUtils;
 import org.jetbrains.jet.lang.resolve.java.resolver.TypeUsage;
@@ -238,8 +238,8 @@ public class SignaturesPropagationData {
                 continue;
             }
 
-            DeclarationDescriptor superFun = superMethod.getPsi() instanceof JetClsMethod
-                                             ? trace.get(BindingContext.DECLARATION_TO_DESCRIPTOR, ((JetClsMethod) superMethod.getPsi()).getOrigin())
+            DeclarationDescriptor superFun = superMethod.getPsi() instanceof JetPsiMethodWrapper
+                                             ? trace.get(BindingContext.DECLARATION_TO_DESCRIPTOR, ((JetPsiMethodWrapper) superMethod.getPsi()).getOrigin())
                                              : findSuperFunction(superclassToFunctions.get(classFqName), superMethod);
             if (superFun == null) {
                 // Super methods which are Object methods in interfaces are not loaded by JDR.

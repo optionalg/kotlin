@@ -27,7 +27,7 @@ import com.intellij.util.ArrayUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.jet.lang.psi.*;
 import org.jetbrains.jet.lang.resolve.BindingContext;
-import org.jetbrains.jet.lang.resolve.java.jetAsJava.JetClsMethod;
+import org.jetbrains.jet.lang.resolve.java.jetAsJava.JetPsiMethodWrapper;
 import org.jetbrains.jet.plugin.project.AnalyzerFacadeWithCache;
 
 import java.util.ArrayList;
@@ -110,8 +110,8 @@ public class KotlinCalleeMethodsTreeStructure extends KotlinCallTreeStructure {
         }
 
         // Kotlin function or property invoked from Java code
-        if (targetElement instanceof JetClsMethod) {
-            return buildChildrenByKotlinTarget(descriptor, ((JetClsMethod) targetElement).getOrigin());
+        if (targetElement instanceof JetPsiMethodWrapper) {
+            return buildChildrenByKotlinTarget(descriptor, ((JetPsiMethodWrapper) targetElement).getOrigin());
         }
 
         if (targetElement instanceof JetElement) {

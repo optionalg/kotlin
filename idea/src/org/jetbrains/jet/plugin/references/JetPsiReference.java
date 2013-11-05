@@ -29,7 +29,7 @@ import org.jetbrains.jet.lang.psi.JetFile;
 import org.jetbrains.jet.lang.psi.JetReferenceExpression;
 import org.jetbrains.jet.lang.resolve.BindingContext;
 import org.jetbrains.jet.lang.resolve.BindingContextUtils;
-import org.jetbrains.jet.lang.resolve.java.jetAsJava.JetClsMethod;
+import org.jetbrains.jet.lang.resolve.java.jetAsJava.JetPsiMethodWrapper;
 import org.jetbrains.jet.plugin.project.AnalyzerFacadeWithCache;
 
 import java.util.ArrayList;
@@ -88,7 +88,7 @@ public abstract class JetPsiReference implements PsiPolyVariantReference {
     @Override
     public boolean isReferenceTo(PsiElement element) {
         PsiElement target = resolve();
-        PsiElement mirrorElement = element instanceof JetClsMethod ? ((JetClsMethod) element).getOrigin() : null;
+        PsiElement mirrorElement = element instanceof JetPsiMethodWrapper ? ((JetPsiMethodWrapper) element).getOrigin() : null;
         return target == element || (mirrorElement != null && target == mirrorElement) || (target != null && target.getNavigationElement() == element);
     }
 
