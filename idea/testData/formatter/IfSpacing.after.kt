@@ -11,7 +11,7 @@ fun f() {
     else {
     }
 
-    if (true){
+    if (true) {
     } else {
     }
 

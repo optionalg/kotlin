@@ -120,6 +120,9 @@ public class JetFormattingModelBuilder implements FormattingModelBuilder {
                 .betweenInside(REFERENCE_EXPRESSION, FUNCTION_LITERAL_EXPRESSION, CALL_EXPRESSION).spaces(1)
 
                 .aroundInside(ELSE_KEYWORD, IF).spaces(1)
+
+                .betweenInside(RPAR, THEN, IF).spaces(1)
+                .between(RPAR, BODY).spaces(1)
                 ;
     }
 
