@@ -30,6 +30,7 @@ import com.intellij.psi.impl.source.PsiExtensibleClass;
 import com.intellij.util.Function;
 import com.intellij.util.containers.ContainerUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.jet.lang.psi.JetDeclaration;
 
 import java.util.List;
 
@@ -115,7 +116,10 @@ public abstract class CachedLightClass extends AbstractLightClass implements Psi
         return ContainerUtil.map(getDelegate().getMethods(), new Function<PsiMethod, PsiMethod>() {
             @Override
             public PsiMethod fun(PsiMethod method) {
-                return new LightMethod(myManager, method, CachedLightClass.this);
+                JetDeclaration declaration = ClsWrapperStubPsiFactory.getOriginalDeclaration(method);
+                return declaration != null
+                       ? new KotlinLightMethod(myManager, method, declaration, CachedLightClass.this)
+                       : new LightMethod(myManager, method, CachedLightClass.this);
             }
         });
     }
