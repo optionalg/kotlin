@@ -23,9 +23,9 @@ import org.jetbrains.asm4.Type;
 import org.jetbrains.jet.codegen.context.EnclosedValueDescriptor;
 import org.jetbrains.jet.lang.descriptors.CallableDescriptor;
 import org.jetbrains.jet.lang.descriptors.ClassDescriptor;
-import org.jetbrains.jet.lang.descriptors.ClassifierDescriptor;
 import org.jetbrains.jet.lang.descriptors.DeclarationDescriptor;
 import org.jetbrains.jet.lang.psi.JetDelegatorToSuperCall;
+import org.jetbrains.jet.lang.types.JetType;
 
 import java.util.*;
 
@@ -72,10 +72,8 @@ public final class MutableClosure implements CalculatedClosure {
     }
 
     @Override
-    public ClassifierDescriptor getCaptureReceiver() {
-        return captureReceiver
-               ? enclosingReceiverDescriptor.getReceiverParameter().getType().getConstructor().getDeclarationDescriptor()
-               : null;
+    public JetType getCaptureReceiverType() {
+        return captureReceiver ? enclosingReceiverDescriptor.getReceiverParameter().getType(): null;
     }
 
     public void setCaptureReceiver() {
