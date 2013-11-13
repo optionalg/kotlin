@@ -24,6 +24,11 @@ import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiNamedElement
 import org.jetbrains.jet.lang.psi.JetDeclaration
 import org.jetbrains.jet.lang.resolve.java.jetAsJava.JetPsiMethodWrapper
+import com.intellij.psi.PsiParameterList
+import com.intellij.psi.impl.light.LightParameterListBuilder
+import org.jetbrains.jet.plugin.JetLanguage
+import com.intellij.psi.impl.light.LightParameter
+import kotlin.properties.Delegates
 
 public class KotlinLightMethod(manager: PsiManager, val method: PsiMethod, val jetDeclaration: JetDeclaration, containingClass: PsiClass):
         LightMethod(manager, method, containingClass), JetPsiMethodWrapper {
@@ -33,6 +38,17 @@ public class KotlinLightMethod(manager: PsiManager, val method: PsiMethod, val j
     override fun getOrigin(): JetDeclaration? = jetDeclaration
 
     override fun getParent(): PsiElement? = getContainingClass()
+
+    private val paramsList by Delegates.lazy {
+        val parameterBuilder = LightParameterListBuilder(getManager(), JetLanguage.INSTANCE)
+
+        for ((index, parameter) in method.getParameterList().getParameters().withIndices()) {
+            val lightParameter = LightParameter(parameter.getName() ?: "p$index", parameter.getType(), this, JetLanguage.INSTANCE)
+            parameterBuilder.addParameter(lightParameter)
+        }
+
+        parameterBuilder
+    }
 
     override fun setName(name: String): PsiElement? {
         (jetDeclaration as PsiNamedElement).setName(name)
@@ -51,6 +67,8 @@ public class KotlinLightMethod(manager: PsiManager, val method: PsiMethod, val j
 
         return super<LightMethod>.isEquivalentTo(another)
     }
+
+    override fun getParameterList(): PsiParameterList = paramsList
 
     override fun copy(): PsiElement? {
         return KotlinLightMethod(getManager()!!, method, jetDeclaration, getContainingClass()!!)
