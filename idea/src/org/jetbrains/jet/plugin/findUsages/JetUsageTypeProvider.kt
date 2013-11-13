@@ -32,6 +32,7 @@ import org.jetbrains.jet.lexer.JetTokens
 import org.jetbrains.jet.plugin.project.AnalyzerFacadeWithCache
 import org.jetbrains.jet.plugin.JetBundle
 import org.jetbrains.jet.lang.resolve.java.descriptor.JavaNamespaceDescriptor
+import org.jetbrains.jet.lang.resolve.java.lazy.descriptors.LazyJavaPackageFragment
 
 public object JetUsageTypeProvider : UsageTypeProviderEx {
     public override fun getUsageType(element: PsiElement?): UsageType? {
@@ -179,7 +180,8 @@ public object JetUsageTypeProvider : UsageTypeProviderEx {
         val descriptor = bindingContext.get(BindingContext.REFERENCE_TARGET, reference)
 
         return when (descriptor) {
-            is ClassifierDescriptor, is JavaNamespaceDescriptor -> getClassUsageType()
+            // TODO Leaving both JavaNamespaceDescriptor and LazyJavaPackageFragment for compatibility, the former should be removed after switching to lazy JDR
+            is ClassifierDescriptor, is JavaNamespaceDescriptor, is LazyJavaPackageFragment -> getClassUsageType()
             is VariableDescriptor -> getVariableUsageType()
             is FunctionDescriptor -> getFunctionUsageType(descriptor)
             else -> null
