@@ -52,7 +52,11 @@ import static org.jetbrains.jet.lang.resolve.java.DescriptorSearchRule.IGNORE_KO
 import static org.jetbrains.jet.lang.resolve.java.DescriptorSearchRule.INCLUDE_KOTLIN_SOURCES;
 
 public class JavaDescriptorResolver implements DependencyClassByQualifiedNameResolver {
-    private static final boolean LAZY = true;
+    private final boolean LAZY;
+
+    {
+        LAZY = true;
+    }
 
     public static final Name JAVA_ROOT = Name.special("<java_root>");
     public static final ModuleDescriptor FAKE_JAVA_MODULE = new ModuleDescriptorImpl(Name.special("<java module>"), Collections.<ImportPath>emptyList(),
