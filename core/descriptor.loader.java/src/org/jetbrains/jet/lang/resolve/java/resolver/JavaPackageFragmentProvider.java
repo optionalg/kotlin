@@ -16,6 +16,8 @@
 
 package org.jetbrains.jet.lang.resolve.java.resolver;
 
+import com.google.common.collect.Maps;
+import com.intellij.util.NullableFunction;
 import com.intellij.util.containers.ContainerUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,7 +47,7 @@ import java.util.*;
 
 public final class JavaPackageFragmentProvider implements PackageFragmentProvider {
     @NotNull
-    private final Map<FqName, JetScope> packageFragments = new HashMap<FqName, JetScope>();
+    private final Map<FqName, JavaPackageFragmentDescriptor> packageFragments = Maps.newHashMap();
     @NotNull
     private final Set<FqName> unresolvedCache = new HashSet<FqName>();
 
@@ -116,34 +118,32 @@ public final class JavaPackageFragmentProvider implements PackageFragmentProvide
     }
 
     @Nullable
-    public JavaPackageFragmentDescriptor getOrCreatePackage(@NotNull FqName qualifiedName) {
+    public JavaPackageFragmentDescriptor getOrCreatePackage(@NotNull final FqName fqName) {
         // TODO 1 use one cache
-        if (unresolvedCache.contains(qualifiedName)) {
+        if (unresolvedCache.contains(fqName)) {
             return null;
         }
-        JetScope scope = packageFragments.get(qualifiedName);
-        if (scope != null) {
-            return (JavaPackageFragmentDescriptor) scope.getContainingDeclaration();
+        JavaPackageFragmentDescriptor packageFragment = packageFragments.get(fqName);
+        if (packageFragment != null) {
+            return packageFragment;
         }
 
-        JavaPackageFragmentDescriptor packageFragment = new JavaPackageFragmentDescriptor(this, qualifiedName);
+        packageFragment = JavaPackageFragmentDescriptor.create(this, fqName, new NullableFunction<JavaPackageFragmentDescriptor, JetScope>() {
+            @Override
+            @Nullable
+            public JetScope fun(JavaPackageFragmentDescriptor packageFragment) {
+                return createPackageScope(fqName, packageFragment);
+            }
+        });
 
-        JetScope namespaceScope = createPackageScope(qualifiedName, packageFragment, true);
-        cache(qualifiedName, namespaceScope);
-        if (namespaceScope == null) {
-            return null;
-        }
-
-        packageFragment.setMemberScope(namespaceScope);
-
+        cache(fqName, packageFragment);
         return packageFragment;
     }
 
     @Nullable
     private JetScope createPackageScope(
             @NotNull FqName fqName,
-            @NotNull PackageFragmentDescriptor packageFragment,
-            boolean record
+            @NotNull PackageFragmentDescriptor packageFragment
     ) {
         JavaPackage javaPackage = javaClassFinder.findPackage(fqName);
         if (javaPackage != null) {
@@ -159,23 +159,14 @@ public final class JavaPackageFragmentProvider implements PackageFragmentProvide
                 }
             }
 
-
-            // Otherwise (if psiClass is null or doesn't have a supported Kotlin annotation), it's a Java class and the package is empty
-            if (record) {
-                cache.recordPackage(javaPackage, packageFragment);
-            }
-
+            cache.recordPackage(javaPackage, packageFragment);
             return new JavaPackageScope(packageFragment, javaPackage, fqName, memberResolver);
         }
 
         JavaClass javaClass = javaClassFinder.findClass(fqName);
         if (javaClass != null && shouldCreateStaticMembersPackage(javaClass)) {
             cache.recordClassStaticMembersNamespace(packageFragment);
-
-            if (record) {
-                cache.recordPackage(javaClass, packageFragment);
-            }
-
+            cache.recordPackage(javaClass, packageFragment);
             return new JavaClassStaticMembersScope(packageFragment, javaClass, memberResolver);
         }
         return null;
@@ -186,12 +177,12 @@ public final class JavaPackageFragmentProvider implements PackageFragmentProvide
         return !DescriptorResolverUtils.isCompiledKotlinClassOrPackageClass(javaClass) && hasStaticMembers(javaClass);
     }
 
-    private void cache(@NotNull FqName fqName, @Nullable JetScope packageScope) {
-        if (packageScope == null) {
+    private void cache(@NotNull FqName fqName, @Nullable JavaPackageFragmentDescriptor packageFragment) {
+        if (packageFragment == null) {
             unresolvedCache.add(fqName);
             return;
         }
-        JetScope oldValue = packageFragments.put(fqName, packageScope);
+        JavaPackageFragmentDescriptor oldValue = packageFragments.put(fqName, packageFragment);
         if (oldValue != null) {
             throw new IllegalStateException("rewrite at " + fqName);
         }
