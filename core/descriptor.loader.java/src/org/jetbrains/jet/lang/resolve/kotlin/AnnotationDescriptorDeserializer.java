@@ -267,7 +267,7 @@ public class AnnotationDescriptorDeserializer implements AnnotationDeserializer 
             return findKotlinClassByDescriptor((ClassOrNamespaceDescriptor) container.getContainingDeclaration());
         }
         else if (isTrait(container) && kind == AnnotatedCallableKind.PROPERTY) {
-            NamespaceDescriptor containingPackage = DescriptorUtils.getParentOfType(container, NamespaceDescriptor.class);
+            PackageFragmentDescriptor containingPackage = DescriptorUtils.getParentOfType(container, PackageFragmentDescriptor.class);
             assert containingPackage != null : "Trait must have a namespace among his parents: " + container;
 
             if (proto.hasExtension(JavaProtoBuf.implClassName)) {
