@@ -105,10 +105,7 @@ class LazyJavaAnnotationDescriptor(
         val fqName = javaAnnotation.getFqName()
         if (fqName == null) return null
 
-        if (fqName.asString().startsWith("jet.runtime.typeinfo.") ||
-            fqName == JETBRAINS_NOT_NULL_ANNOTATION ||
-            fqName == JvmAnnotationNames.KOTLIN_CLASS ||
-            fqName == JvmAnnotationNames.KOTLIN_PACKAGE) {
+        if (JavaAnnotationResolver.isSpecialAnnotation(fqName)) {
             return null
         }
 
