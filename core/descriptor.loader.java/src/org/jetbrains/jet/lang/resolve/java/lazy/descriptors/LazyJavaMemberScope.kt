@@ -40,6 +40,7 @@ import org.jetbrains.jet.lang.resolve.java.sam.SingleAbstractMethodUtils
 import org.jetbrains.jet.lang.resolve.java.descriptor.JavaPropertyDescriptorForObject
 import org.jetbrains.jet.lang.descriptors.impl.ClassDescriptorImpl
 import org.jetbrains.jet.utils.Printer
+import org.jetbrains.annotations.TestOnly
 
 public abstract class LazyJavaMemberScope(
         protected val c: LazyJavaResolverContextWithTypes,
@@ -337,7 +338,7 @@ public abstract class LazyJavaMemberScope(
 
     override fun toString() = "Lazy scope for ${getContainingDeclaration()}"
 
-
+    TestOnly
     override fun printScopeStructure(p: Printer) {
         p.println(javaClass.getSimpleName(), " {")
         p.pushIndent()

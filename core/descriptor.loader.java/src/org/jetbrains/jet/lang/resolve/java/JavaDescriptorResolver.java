@@ -212,6 +212,7 @@ public class JavaDescriptorResolver implements DependencyClassByQualifiedNameRes
                     new GlobalJavaResolverContext(
                             storageManager,
                             new JavaClassFinder() {
+
                                 @Nullable
                                 @Override
                                 public JavaClass findClass(@NotNull FqName fqName) {
