@@ -127,26 +127,24 @@ class LazyJavaClassDescriptor(
 
     private inner class LazyJavaClassTypeConstructor : TypeConstructor {
 
-        // TODO: workaround for http://youtrack.jetbrains.com/issue/KT-4106
-        private val outer = this@LazyJavaClassDescriptor
         private val _parameters = c.storageManager.createLazyValue {
-            outer.jClass.getTypeParameters().map({
+            jClass.getTypeParameters().map({
                 p ->
-                outer.innerC.typeParameterResolver.resolveTypeParameter(p)
-                    ?: throw AssertionError("Parameter $p surely belongs to class ${outer.jClass}, so it must be resolved")
+                innerC.typeParameterResolver.resolveTypeParameter(p)
+                    ?: throw AssertionError("Parameter $p surely belongs to class ${jClass}, so it must be resolved")
             })
         }
 
         override fun getParameters(): List<TypeParameterDescriptor> = _parameters()
 
         private val _supertypes = c.storageManager.createLazyValue<Collection<JetType>> {
-            val supertypes = outer.jClass.getSupertypes()
+            val supertypes = jClass.getSupertypes()
             if (supertypes.isEmpty())
-                if (outer.jClass.getFqName() == JavaSupertypeResolver.OBJECT_FQ_NAME) {
+                if (jClass.getFqName() == JavaSupertypeResolver.OBJECT_FQ_NAME) {
                     listOf(KotlinBuiltIns.getInstance().getAnyType())
                 }
                 else {
-                    val jlObject = outer.innerC.javaClassResolver.resolveClassByFqName(JavaSupertypeResolver.OBJECT_FQ_NAME)?.getDefaultType()
+                    val jlObject = innerC.javaClassResolver.resolveClassByFqName(JavaSupertypeResolver.OBJECT_FQ_NAME)?.getDefaultType()
                     // If java.lang.Object is not found, we simply use Any to recover
                     listOf(jlObject ?: KotlinBuiltIns.getInstance().getAnyType())
                 }
@@ -154,7 +152,7 @@ class LazyJavaClassDescriptor(
                 supertypes.iterator()
                         .map {
                             supertype ->
-                            outer.innerC.typeResolver.transformJavaType(supertype, TypeUsage.SUPERTYPE.toAttributes())
+                            innerC.typeResolver.transformJavaType(supertype, TypeUsage.SUPERTYPE.toAttributes())
                         }
                         .filter { supertype -> !supertype.isError() }
                         .toList()
