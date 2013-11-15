@@ -290,9 +290,7 @@ public class WriteThroughScope extends WritableScopeWithImports {
     @TestOnly
     @Override
     protected void printAdditionalScopeStructure(@NotNull Printer p) {
-        p.println("writableWorker = ");
-        p.pushIndent();
+        p.print("writableWorker = ");
         writableWorker.printScopeStructure(p.withholdIndentOnce());
-        p.popIndent();
     }
 }
