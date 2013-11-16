@@ -1,3 +1,4 @@
+//file
 package org.jetbrains.jet.j2k.in;
 
 import org.jetbrains.annotations.NotNull;

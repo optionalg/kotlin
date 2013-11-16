@@ -1,3 +1,4 @@
+//file
 class Test {
     public static int getInt(int i) {
         switch (i) {

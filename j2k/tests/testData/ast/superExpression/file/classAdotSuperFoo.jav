@@ -1,3 +1,4 @@
+//file
 class Base {
   void foo();
 }

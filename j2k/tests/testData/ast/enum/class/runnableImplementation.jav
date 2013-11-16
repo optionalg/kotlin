@@ -1,3 +1,4 @@
+//class
 enum Color implements Runnable {
   WHITE, BLACK, RED, YELLOW, BLUE;
 

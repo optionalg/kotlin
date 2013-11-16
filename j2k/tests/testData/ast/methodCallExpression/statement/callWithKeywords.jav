@@ -1,1 +1,2 @@
+//statement
 when(open, trait);

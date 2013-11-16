@@ -1,3 +1,4 @@
+//file
 package test;
 
 class Base {

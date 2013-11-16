@@ -1,3 +1,4 @@
+//file
 class Test {
   void test() {
     boolean t1 = true;

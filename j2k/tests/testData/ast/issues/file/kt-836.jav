@@ -1,3 +1,4 @@
+//file
 package com.voltvoodoo.saplo4j.model;
 
 import java.io.Serializable;

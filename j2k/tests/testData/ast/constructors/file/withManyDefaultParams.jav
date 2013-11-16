@@ -1,3 +1,4 @@
+//file
 public class Test {
   private final String myName;
   private boolean a;

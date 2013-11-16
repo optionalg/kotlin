@@ -1,3 +1,4 @@
+//file
 import java.util.HashMap;
 
 class G <T extends String> {

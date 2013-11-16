@@ -1,1 +1,2 @@
-for (init(); condition(); ) body();
+//statement
+for (init(); condition(); ) body();

@@ -1,3 +1,4 @@
+//file
 class Test {
   void test() {
     long l1 = 10L;

@@ -1,3 +1,4 @@
+//file
 package org.test
 
 class Library {}

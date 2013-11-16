@@ -1,1 +1,2 @@
+//method
 protected void test() {}

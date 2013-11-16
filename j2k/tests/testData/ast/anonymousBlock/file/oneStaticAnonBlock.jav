@@ -1,3 +1,4 @@
+//file
 class Test {
   String str;
   static {

@@ -1,1 +1,2 @@
+//method
 String getString() { return ""; }

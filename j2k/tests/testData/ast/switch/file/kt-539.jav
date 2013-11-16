@@ -1,3 +1,4 @@
+//file
 package switch_demo;
 
 public class SwitchDemo {

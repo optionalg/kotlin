@@ -1,3 +1,4 @@
+//comp
 package demo;
 
 class Test {

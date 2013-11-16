@@ -1,3 +1,4 @@
+//file
 class Test {
   void test() {
     int i1 = 045;

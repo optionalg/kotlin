@@ -1,3 +1,4 @@
+//class
 package demo;
 
 enum Color {

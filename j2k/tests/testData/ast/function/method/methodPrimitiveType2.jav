@@ -1,1 +1,2 @@
+//method
 boolean main() {}

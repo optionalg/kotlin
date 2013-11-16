@@ -1,3 +1,4 @@
+//file
 class Library {
   static void call() {}
 

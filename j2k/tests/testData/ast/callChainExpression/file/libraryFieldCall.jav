@@ -1,3 +1,4 @@
+//file
 class Library {
   final static java.io.PrintStream ourOut;
 }

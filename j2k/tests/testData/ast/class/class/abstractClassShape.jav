@@ -1,3 +1,4 @@
+//class
 abstract class Shape {
 	public String color;
 	public Shape() {

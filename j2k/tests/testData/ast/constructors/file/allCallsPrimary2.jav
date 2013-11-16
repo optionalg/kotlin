@@ -1,3 +1,4 @@
+//file
 class C {
   final int myArg1;
   int myArg2;
