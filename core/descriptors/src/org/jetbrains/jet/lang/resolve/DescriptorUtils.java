@@ -471,4 +471,12 @@ public class DescriptorUtils {
         assert classObject != null : "Enum class should have a class object: " + enumClass;
         return classObject.getDefaultType().getMemberScope();
     }
+
+    public static boolean isObject(@NotNull DeclarationDescriptor classifier) {
+        if (classifier instanceof ClassDescriptor) {
+            ClassDescriptor clazz = (ClassDescriptor) classifier;
+            return clazz.getKind().isObject();
+        }
+        return false;
+    }
 }
