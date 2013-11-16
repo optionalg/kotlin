@@ -5355,6 +5355,11 @@ public class JetDiagnosticsTestGenerated extends AbstractDiagnosticsTestWithEage
                 doTest("compiler/testData/diagnostics/tests/scopes/ImportFromCurrentWithDifferentName.kt");
             }
             
+            @TestMetadata("ImportObjectAndUseAsSupertype.kt")
+            public void testImportObjectAndUseAsSupertype() throws Exception {
+                doTest("compiler/testData/diagnostics/tests/scopes/ImportObjectAndUseAsSupertype.kt");
+            }
+            
             @TestMetadata("ImportObjectHidesCurrentPackage.kt")
             public void testImportObjectHidesCurrentPackage() throws Exception {
                 doTest("compiler/testData/diagnostics/tests/scopes/ImportObjectHidesCurrentPackage.kt");
