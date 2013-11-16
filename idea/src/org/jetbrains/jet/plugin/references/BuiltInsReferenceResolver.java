@@ -50,8 +50,8 @@ import java.net.URL;
 import java.util.*;
 
 public class BuiltInsReferenceResolver extends AbstractProjectComponent {
-    private volatile BindingContext bindingContext = null;
-    private volatile Set<JetFile> builtInsSources = Sets.newHashSet();
+    private volatile BindingContext bindingContext;
+    private volatile Set<JetFile> builtInsSources;
     private volatile MutablePackageFragmentDescriptor builtinsPackageFragment;
 
     public BuiltInsReferenceResolver(Project project) {
@@ -84,7 +84,7 @@ public class BuiltInsReferenceResolver extends AbstractProjectComponent {
                         myProject, topDownAnalysisParameters, new BindingTraceContext(), module, PlatformToKotlinClassMap.EMPTY);
 
                 TopDownAnalyzer analyzer = injector.getTopDownAnalyzer();
-                analyzer.analyzeFiles(builtInsSources, Collections.<AnalyzerScriptParameter>emptyList());
+                analyzer.analyzeFiles(jetBuiltInsFiles, Collections.<AnalyzerScriptParameter>emptyList());
 
                 builtinsPackageFragment = analyzer.getPackageFragmentProvider().getOrCreateFragment(KotlinBuiltIns.BUILT_INS_PACKAGE_FQ_NAME);
                 builtInsSources = Sets.newHashSet(jetBuiltInsFiles);
@@ -169,9 +169,9 @@ public class BuiltInsReferenceResolver extends AbstractProjectComponent {
             return findCurrentDescriptorForClass((ClassDescriptor) originalDescriptor);
         }
         else if (originalDescriptor instanceof PackageFragmentDescriptor) {
-            assert KotlinBuiltIns.BUILT_INS_PACKAGE_FQ_NAME.equals(((PackageFragmentDescriptor) originalDescriptor).getFqName())
-                    : "Unexpected package fragment " + originalDescriptor;
-            return builtinsPackageFragment;
+            return KotlinBuiltIns.BUILT_INS_PACKAGE_FQ_NAME.equals(((PackageFragmentDescriptor) originalDescriptor).getFqName())
+                   ? builtinsPackageFragment
+                   : null;
         }
         else if (originalDescriptor instanceof MemberDescriptor) {
             return findCurrentDescriptorForMember((MemberDescriptor) originalDescriptor);
