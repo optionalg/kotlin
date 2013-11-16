@@ -21,27 +21,28 @@ import com.intellij.openapi.util.io.FileUtil
 import junit.framework.Assert
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.PsiFile
-import junit.framework.Test
-import junit.framework.TestSuite
-import java.io.FilenameFilter
-import java.io.FileFilter
-import java.util.Collections
 import org.jetbrains.jet.j2k.Converter
 import org.jetbrains.jet.j2k.JavaToKotlinTranslator
 import org.jetbrains.jet.ConfigurationKind
 import org.jetbrains.jet.JetTestUtils.createEnvironmentWithMockJdkAndIdeaAnnotations
 import com.intellij.testFramework.UsefulTestCase
 import org.jetbrains.jet.j2k.ConverterSettings
+import org.jetbrains.jet.j2k.PluginSettings
+import org.jetbrains.jet.j2k.TestSettings
+import java.util.regex.Pattern
 
-public abstract class StandaloneJavaToKotlinConverterTest(val dataPath: String,
-                                                          val name: String,
-                                                          val settings: ConverterSettings) : UsefulTestCase() {
+public abstract class AbstractJavaToKotlinConveterTestForPlugin() : AbstractJavaToKotlinConverterTest("ide.kt", PluginSettings)
+public abstract class AbstractJavaToKotlinConveterTestBasic() : AbstractJavaToKotlinConverterTest("kt", TestSettings)
 
-    protected override fun runTest(): Unit {
+public abstract class AbstractJavaToKotlinConverterTest(val kotlinFileExtension: String,
+                                                        val settings: ConverterSettings) : UsefulTestCase() {
+
+    val testHeaderPattern = Pattern.compile("//(expression|statement|method|class|file|comp)\n")
+
+    protected fun doTest(javaPath: String) {
         val jetCoreEnvironment = createEnvironmentWithMockJdkAndIdeaAnnotations(getTestRootDisposable(), ConfigurationKind.JDK_ONLY)
         val converter = Converter(jetCoreEnvironment.getProject(), settings)
-        val javaPath = "j2k/tests/testData/" + getTestFilePath()
-        val kotlinPath = javaPath.replace(".jav", ".kt")
+        val kotlinPath = javaPath.replace(".jav", ".$kotlinFileExtension")
         val kotlinFile = File(kotlinPath)
         if (!kotlinFile.exists()) {
             FileUtil.writeToFile(kotlinFile, "")
@@ -49,18 +50,20 @@ public abstract class StandaloneJavaToKotlinConverterTest(val dataPath: String,
 
         val expected = FileUtil.loadFile(kotlinFile, true)
         val javaFile = File(javaPath)
-        val javaCode = FileUtil.loadFile(javaFile, true)
-        val parentFileName = javaFile.getParentFile()?.getName()
-
-        val actual = when (parentFileName) {
+        val fileContents = FileUtil.loadFile(javaFile, true)
+        val matcher = testHeaderPattern.matcher(fileContents)
+        matcher.find()
+        val prefix = matcher.group().trim().substring(2)
+        val javaCode = matcher.replaceFirst("")
+        val actual = when (prefix) {
             "expression" -> expressionToKotlin(converter, javaCode)
             "statement" -> statementToKotlin(converter, javaCode)
             "method" -> methodToKotlin(converter, javaCode)
             "class" -> fileToKotlin(converter, javaCode)
             "file" -> fileToKotlin(converter, javaCode)
             "comp" -> fileToFileWithCompatibilityImport(javaCode)
-            else -> throw IllegalStateException("Specify what is it: file, class, method, statement or expression:" +
-                                                "$javaPath parent: $parentFileName")
+            else -> throw IllegalStateException("Specify what is it: file, class, method, statement or expression "+
+                                                "using the first line of test data file")
         }
 
         val tmp = File(kotlinPath + ".tmp")
@@ -73,10 +76,6 @@ public abstract class StandaloneJavaToKotlinConverterTest(val dataPath: String,
         }
 
         Assert.assertEquals(expected, actual)
-    }
-
-    fun getTestFilePath(): String {
-        return "$dataPath/$name.jav"
     }
 
     private fun fileToKotlin(converter: Converter, text: String): String {
@@ -98,7 +97,7 @@ public abstract class StandaloneJavaToKotlinConverterTest(val dataPath: String,
 
     private fun expressionToKotlin(converter: Converter, code: String?): String {
         var result = statementToKotlin(converter, "final Object o =" + code + "}")
-        result = result.replaceFirst("val o : Any\\? =", "").replaceFirst("val o : Any = ", "")
+        result = result.replaceFirst("val o : Any\\? =", "").replaceFirst("val o : Any = ", "").replaceFirst("val o = ", "")
         return prettify(result)
     }
 
@@ -122,65 +121,4 @@ public abstract class StandaloneJavaToKotlinConverterTest(val dataPath: String,
 
         return code.trim().replaceAll("\r\n", "\n").replaceAll(" \n", "\n").replaceAll("\n ", "\n").replaceAll("\n+", "\n").replaceAll(" +", " ").trim()
     }
-
 }
-private val emptyFilter = object : FilenameFilter {
-    public override fun accept(dir: File, name: String): Boolean {
-        return true
-    }
-}
-
-public trait NamedTestFactory {
-    fun createTest(dataPath: String, name: String): Test
-}
-
-public fun suiteForDirectory(baseDataDir: String?, dataPath: String, factory: NamedTestFactory): TestSuite {
-    return suiteForDirectory(baseDataDir, dataPath, true, emptyFilter, factory)
-}
-
-public fun suiteForDirectory(baseDataDir: String?, dataPath: String, recursive: Boolean, filter: FilenameFilter, factory: NamedTestFactory): TestSuite {
-    val suite = TestSuite(dataPath)
-    val extensionJava = ".jav"
-    val extensionFilter = object : FilenameFilter {
-        public override fun accept(dir: File, name: String): Boolean {
-            return name.endsWith(extensionJava)
-        }
-    }
-
-    val resultFilter =
-            if (filter != emptyFilter) {
-                object : FilenameFilter {
-                    public override fun accept(dir: File, name: String): Boolean {
-                        return (extensionFilter.accept(dir, name)) && filter.accept(dir, name)
-                    }
-                }
-            }
-            else {
-                extensionFilter
-            }
-
-    val dir = File(baseDataDir + dataPath)
-    val dirFilter = object : FileFilter {
-        public override fun accept(pathname: File): Boolean {
-            return pathname.isDirectory()
-        }
-    }
-
-    if (recursive) {
-        val files = dir.listFiles(dirFilter)
-        val subdirs = files!!.toLinkedList()
-        Collections.sort(subdirs)
-        for (subdir in subdirs) {
-            suite.addTest(suiteForDirectory(baseDataDir, dataPath + "/" + subdir.getName(), recursive, filter, factory))
-        }
-    }
-
-    val files = (dir.listFiles(resultFilter))!!.toLinkedList()
-    Collections.sort(files)
-    for (file in files) {
-        val testName = file.getName().substring(0, (file.getName().length()) - (extensionJava.length()))
-        suite.addTest(factory.createTest(dataPath, testName))
-    }
-    return suite
-}
-
