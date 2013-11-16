@@ -105,7 +105,7 @@ public abstract class KotlinIntegrationTestBase {
         String contentWithRelativePaths = content.replace(baseDir.getAbsolutePath(), pathId);
 
         @Language("RegExp")
-        String RELATIVE_PATH_WITH_MIXED_SEPARATOR = Pattern.quote(pathId) + "(?:[/\\\\][-.\\w]*)*";
+        String RELATIVE_PATH_WITH_MIXED_SEPARATOR = Pattern.quote(pathId) + "[-.\\w/\\\\]*";
 
         return KotlinPackage.replaceAll(contentWithRelativePaths, RELATIVE_PATH_WITH_MIXED_SEPARATOR, new Function1<MatchResult, String>() {
             @Override
