@@ -18,10 +18,13 @@ package org.jetbrains.jet.lang.resolve.extension;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.jet.lang.descriptors.FunctionDescriptor;
+import org.jetbrains.jet.lang.descriptors.SimpleFunctionDescriptor;
 import org.jetbrains.jet.lang.diagnostics.Errors;
 import org.jetbrains.jet.lang.psi.*;
 import org.jetbrains.jet.lang.resolve.BindingTrace;
 import org.jetbrains.jet.lang.resolve.FunctionAnalyzerExtension;
+
+import java.util.List;
 
 public class InlineAnalyzerExtension implements FunctionAnalyzerExtension.AnalyzerExtension {
 
@@ -35,6 +38,10 @@ public class InlineAnalyzerExtension implements FunctionAnalyzerExtension.Analyz
     public void process(
             @NotNull final FunctionDescriptor descriptor, @NotNull JetNamedFunction function, @NotNull final BindingTrace trace
     ) {
+        assert descriptor instanceof SimpleFunctionDescriptor && ((SimpleFunctionDescriptor) descriptor).isInline() :
+                "This method should be invoced on inline function: " + descriptor;
+
+        checkDefaults(descriptor, function, trace);
 
         JetVisitorVoid visitor = new JetVisitorVoid() {
 
@@ -61,5 +68,18 @@ public class InlineAnalyzerExtension implements FunctionAnalyzerExtension.Analyz
         };
 
         function.acceptChildren(visitor);
+    }
+
+    private static void checkDefaults(
+            @NotNull FunctionDescriptor functionDescriptor,
+            @NotNull JetFunction function,
+            @NotNull BindingTrace trace
+    ) {
+        List<JetParameter> parameters = function.getValueParameters();
+        for (JetParameter parameter : parameters) {
+            if (parameter.getDefaultValue() != null) {
+                trace.report(Errors.NOT_YET_SUPPORTED_IN_INLINE.on(parameter, parameter, functionDescriptor));
+            }
+        }
     }
 }

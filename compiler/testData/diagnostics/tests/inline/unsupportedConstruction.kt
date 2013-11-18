@@ -24,3 +24,7 @@ inline fun unsupported() {
         fun localInner() {}
     }<!>
 }
+
+inline fun unsupportedDefault(<!NOT_YET_SUPPORTED_IN_INLINE!>s : Int = 10<!>) {
+
+}
