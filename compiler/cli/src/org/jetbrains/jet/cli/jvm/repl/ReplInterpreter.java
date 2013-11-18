@@ -299,8 +299,7 @@ public class ReplInterpreter {
 
         // dummy builder is used because "root" is module descriptor,
         // namespaces added to module explicitly in
-        injector.getTopDownAnalyzer().doProcess(module.getPackage(FqName.ROOT).getMemberScope(),
-                                                new NamespaceLikeBuilderDummy(), Collections.singletonList(psiFile));
+        injector.getTopDownAnalyzer().doProcess(scope, new NamespaceLikeBuilderDummy(), Collections.singletonList(psiFile));
 
         boolean hasErrors = AnalyzerWithCompilerReport.reportDiagnostics(trace.getBindingContext(), messageCollector);
         if (hasErrors) {
