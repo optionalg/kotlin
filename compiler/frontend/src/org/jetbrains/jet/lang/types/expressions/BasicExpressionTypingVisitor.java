@@ -35,14 +35,16 @@ import org.jetbrains.jet.lang.resolve.calls.autocasts.DataFlowInfo;
 import org.jetbrains.jet.lang.resolve.calls.autocasts.DataFlowValue;
 import org.jetbrains.jet.lang.resolve.calls.autocasts.DataFlowValueFactory;
 import org.jetbrains.jet.lang.resolve.calls.autocasts.Nullability;
+import org.jetbrains.jet.lang.resolve.calls.context.BasicCallResolutionContext;
 import org.jetbrains.jet.lang.resolve.calls.context.CheckValueArgumentsMode;
 import org.jetbrains.jet.lang.resolve.calls.context.TemporaryTraceAndCache;
-import org.jetbrains.jet.lang.resolve.calls.model.ResolvedCall;
-import org.jetbrains.jet.lang.resolve.calls.model.ResolvedCallWithTrace;
-import org.jetbrains.jet.lang.resolve.calls.model.VariableAsFunctionResolvedCall;
+import org.jetbrains.jet.lang.resolve.calls.model.*;
 import org.jetbrains.jet.lang.resolve.calls.results.OverloadResolutionResults;
 import org.jetbrains.jet.lang.resolve.calls.results.OverloadResolutionResultsImpl;
 import org.jetbrains.jet.lang.resolve.calls.results.OverloadResolutionResultsUtil;
+import org.jetbrains.jet.lang.resolve.calls.tasks.ExplicitReceiverKind;
+import org.jetbrains.jet.lang.resolve.calls.tasks.ResolutionCandidate;
+import org.jetbrains.jet.lang.resolve.calls.tasks.TracingStrategy;
 import org.jetbrains.jet.lang.resolve.calls.util.CallMaker;
 import org.jetbrains.jet.lang.resolve.constants.*;
 import org.jetbrains.jet.lang.resolve.constants.StringValue;
@@ -269,8 +271,17 @@ public class BasicExpressionTypingVisitor extends ExpressionTypingVisitor {
                 context.trace.report(NO_THIS.on(expression));
                 break;
             case SUCCESS:
-                result = resolutionResult.getReceiverParameterDescriptor().getType();
+                ReceiverParameterDescriptor descriptor = resolutionResult.getReceiverParameterDescriptor();
+                result = descriptor.getType();
                 context.trace.record(BindingContext.EXPRESSION_TYPE, expression.getInstanceReference(), result);
+
+                ResolvedCall<? extends CallableDescriptor> resolvedCall = context.trace.get(BindingContext.RESOLVED_CALL, expression);
+                if (resolvedCall != null) {
+                    Call call = context.trace.get(BindingContext.CALL, expression);
+                    assert call != null : "Call should be not null for fake this resolved call " + resolvedCall;
+                    context.callResolverExtension.run(resolvedCall,
+                                  BasicCallResolutionContext.create(context, call, CheckValueArgumentsMode.DISABLED));
+                }
                 break;
         }
         return DataFlowUtils.checkType(result, expression, context, context.dataFlowInfo);
@@ -427,9 +438,34 @@ public class BasicExpressionTypingVisitor extends ExpressionTypingVisitor {
             }
             if (result != NO_RECEIVER_PARAMETER) {
                 context.trace.record(REFERENCE_TARGET, expression.getInstanceReference(), result.getContainingDeclaration());
+                recordThisOrSuperCallInTrace(context.trace, result, expression);
             }
             return LabelResolver.LabeledReceiverResolutionResult.labelResolutionSuccess(result);
         }
+    }
+
+    private static void recordThisOrSuperCallInTrace(
+            BindingTrace trace,
+            ReceiverParameterDescriptor descriptor,
+            JetExpression expression
+    ) {
+        ResolutionCandidate<ReceiverParameterDescriptor> resolutionCandidate =
+                ResolutionCandidate.create(descriptor,
+                                           NO_RECEIVER,
+                                           NO_RECEIVER,
+                                           ExplicitReceiverKind.NO_EXPLICIT_RECEIVER,
+                                           false);
+
+        Call call = CallMaker.makeCall(expression, NO_RECEIVER, null, expression, Collections.<ValueArgument>emptyList());
+        ResolvedCallImpl<ReceiverParameterDescriptor> resolvedCall =
+                ResolvedCallImpl.create(resolutionCandidate,
+                                        TemporaryBindingTrace.create(trace, "Fake trace for fake 'this' or 'super' resolved call"),
+                                        TracingStrategy.EMPTY,
+                                        new DataFlowInfoForArgumentsImpl(call));
+        resolvedCall.markCallAsCompleted();
+
+        trace.record(RESOLVED_CALL, expression, resolvedCall);
+        trace.record(CALL, expression, call);
     }
 
     private static boolean isDeclaredInClass(ReceiverParameterDescriptor receiver) {
