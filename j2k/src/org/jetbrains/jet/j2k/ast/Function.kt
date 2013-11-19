@@ -75,7 +75,7 @@ public open class Function(val name: Identifier,
         return modifierList.toKotlin()
     }
 
-    private fun returnTypeToKotlin() = if (!`type`.isUnit()) " : " + `type`.toKotlin() + " " else ""
+    private fun returnTypeToKotlin() = if (!`type`.isUnit()) " : " + `type`.toKotlin() + " " else " "
 
     public override fun toKotlin(): String {
         return docComments.toKotlin("\n", "", "\n") +
