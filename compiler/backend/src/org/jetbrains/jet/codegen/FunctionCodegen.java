@@ -46,9 +46,9 @@ import java.util.*;
 
 import static org.jetbrains.asm4.Opcodes.*;
 import static org.jetbrains.jet.codegen.AsmUtil.*;
-import static org.jetbrains.jet.codegen.JvmSerializationBindings.*;
 import static org.jetbrains.jet.codegen.CodegenUtil.isCallInsideSameClassAsDeclared;
 import static org.jetbrains.jet.codegen.CodegenUtil.isCallInsideSameModuleAsDeclared;
+import static org.jetbrains.jet.codegen.JvmSerializationBindings.*;
 import static org.jetbrains.jet.codegen.binding.CodegenBinding.asmTypeForAnonymousClass;
 import static org.jetbrains.jet.codegen.binding.CodegenBinding.isLocalNamedFun;
 import static org.jetbrains.jet.lang.resolve.BindingContextUtils.callableDescriptorToDeclaration;
@@ -133,8 +133,6 @@ public class FunctionCodegen extends ParentCodegenAwareImpl {
                     getThisTypeForFunction(functionDescriptor, methodContext),
                     new Label(),
                     new Label(),
-                    new HashSet<String>(getParameterNamesAsStrings(functionDescriptor)),
-                    Collections.<Name, Label>emptyMap(),
                     methodContext.getContextKind()
             );
             return;
