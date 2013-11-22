@@ -132,7 +132,7 @@ public class DescriptorSerializer {
         }
 
         if (classDescriptor.getKind() == ClassKind.ENUM_CLASS) {
-            for (DeclarationDescriptor descriptor : getEnumEntriesScope(classDescriptor).getAllDescriptors()) {
+            for (DeclarationDescriptor descriptor : nestedClasses) {
                 if (isEnumEntry(descriptor)) {
                     builder.addEnumEntry(nameTable.getSimpleNameIndex(descriptor.getName()));
                 }
