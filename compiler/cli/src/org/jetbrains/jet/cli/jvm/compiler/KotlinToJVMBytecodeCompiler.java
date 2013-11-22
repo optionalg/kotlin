@@ -293,7 +293,8 @@ public class KotlinToJVMBytecodeCompiler {
                 project, ClassBuilderFactories.BINARIES, Progress.DEAF, exhaust.getBindingContext(), environment.getSourceFiles(),
                 configuration.get(JVMConfigurationKeys.GENERATE_NOT_NULL_ASSERTIONS, false),
                 configuration.get(JVMConfigurationKeys.GENERATE_NOT_NULL_PARAMETER_ASSERTIONS, false),
-                /*generateDeclaredClasses = */true
+                /*generateDeclaredClasses = */true,
+                configuration.get(JVMConfigurationKeys.ENABLE_INLINE, false)
         );
         KotlinCodegenFacade.compileCorrectFiles(generationState, CompilationErrorHandler.THROW_EXCEPTION);
 

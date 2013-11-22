@@ -60,7 +60,8 @@ public class CodegenTestUtil {
                 environment.getProject(), ClassBuilderFactories.TEST, Progress.DEAF, analyzeExhaust.getBindingContext(), files.getPsiFiles(),
                 configuration.get(JVMConfigurationKeys.GENERATE_NOT_NULL_ASSERTIONS, true),
                 configuration.get(JVMConfigurationKeys.GENERATE_NOT_NULL_PARAMETER_ASSERTIONS, true),
-                /*generateDeclaredClasses = */true
+                /*generateDeclaredClasses = */true,
+                configuration.get(JVMConfigurationKeys.ENABLE_INLINE, true)
         );
         KotlinCodegenFacade.compileCorrectFiles(state, CompilationErrorHandler.THROW_EXCEPTION);
         return state.getFactory();
