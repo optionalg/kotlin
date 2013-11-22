@@ -152,7 +152,8 @@ public class KotlinJavaFileStubProvider implements CachedValueProvider<PsiJavaFi
                     context.getBindingContext(),
                     Lists.newArrayList(files),
                     /*not-null assertions*/false, false,
-                    /*generateDeclaredClasses=*/stubGenerationStrategy.generateDeclaredClasses());
+                    /*generateDeclaredClasses=*/stubGenerationStrategy.generateDeclaredClasses(),
+                    false);
             state.beforeCompile();
 
             stubGenerationStrategy.generate(state, files);
