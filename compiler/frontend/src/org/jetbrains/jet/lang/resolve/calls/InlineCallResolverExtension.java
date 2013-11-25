@@ -81,10 +81,7 @@ public class InlineCallResolverExtension implements CallResolverExtension {
 
         boolean isInlinableClosure = inlinableParameters.contains(targetDescriptor);
         if (isInlinableClosure) {
-            PsiElement parent = expression.getParent();
-            if (parent instanceof JetValueArgument || parent instanceof JetBinaryExpression || parent instanceof JetDotQualifiedExpression || parent instanceof JetCallExpression) {
-                //check that it's in inlineable call would be in resolve call of parent
-            } else {
+            if (!couldAccessVariable(expression)) {
                 context.trace.report(Errors.USAGE_IS_NOT_INLINABLE.on(expression, expression, descriptor));
             }
         }
@@ -99,6 +96,21 @@ public class InlineCallResolverExtension implements CallResolverExtension {
         }
 
         checkVisibility(targetDescriptor, expression, context);
+    }
+
+    private boolean couldAccessVariable(JetExpression expression) {
+        PsiElement parent = expression.getParent();
+        if (parent instanceof JetValueArgument ||
+            parent instanceof JetBinaryExpression ||
+            parent instanceof JetDotQualifiedExpression ||
+            parent instanceof JetCallExpression) {
+            //check that it's in inlineable call would be in resolve call of parent
+            return true;
+        }
+        else if (parent instanceof JetParenthesizedExpression || parent instanceof JetBinaryExpressionWithTypeRHS) {
+            return couldAccessVariable((JetExpression) parent);
+        }
+        return false;
     }
 
     private void checkValueParameter(BasicCallResolutionContext context, CallableDescriptor targetDescriptor, ValueArgument argument, boolean isVararg) {
