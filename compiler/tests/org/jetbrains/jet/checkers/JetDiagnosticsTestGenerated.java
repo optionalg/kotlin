@@ -3797,9 +3797,19 @@ public class JetDiagnosticsTestGenerated extends AbstractDiagnosticsTestWithEage
                 doTest("compiler/testData/diagnostics/tests/inline/nullableFunction.kt");
             }
             
+            @TestMetadata("parenthesized.kt")
+            public void testParenthesized() throws Exception {
+                doTest("compiler/testData/diagnostics/tests/inline/parenthesized.kt");
+            }
+            
             @TestMetadata("propagation.kt")
             public void testPropagation() throws Exception {
                 doTest("compiler/testData/diagnostics/tests/inline/propagation.kt");
+            }
+            
+            @TestMetadata("typed.kt")
+            public void testTyped() throws Exception {
+                doTest("compiler/testData/diagnostics/tests/inline/typed.kt");
             }
             
             @TestMetadata("unsupportedConstruction.kt")
