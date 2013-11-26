@@ -20,7 +20,8 @@ package org.jetbrains.jet.j2k.ast
 public abstract class Statement() : Element {
     class object {
         public val EMPTY_STATEMENT: Statement = object : Statement() {
-            public override fun toKotlin() = ""
+            override fun toKotlin() = ""
+            override fun isEmpty() = true
         }
     }
 }
