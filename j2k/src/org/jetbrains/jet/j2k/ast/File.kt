@@ -21,7 +21,7 @@ public open class File(val packageName: String,
                        val mainFunction: String) : Node {
 
     public override fun toKotlin(): String {
-        val common = body.toKotlin("\n") + "\n" + mainFunction
+        val common = body.toKotlin("\n") + mainFunction
         if (packageName.isEmpty()) {
             return common
         }

@@ -23,7 +23,7 @@ public open class Block(val statements: List<Element>, val notEmpty: Boolean = f
 
     public override fun toKotlin(): String {
         if (!isEmpty()) {
-            return "{\n" + statements.toKotlin("\n") + "\n}"
+            return "{\n" + statements.toKotlin("\n", "", "\n") + "}"
         }
 
         return ""
