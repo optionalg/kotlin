@@ -29,6 +29,7 @@ import org.jetbrains.jet.lang.descriptors.annotations.AnnotationDescriptor;
 import org.jetbrains.jet.lang.descriptors.impl.AnonymousFunctionDescriptor;
 import org.jetbrains.jet.lang.diagnostics.Errors;
 import org.jetbrains.jet.lang.evaluate.ConstantExpressionEvaluator;
+import org.jetbrains.jet.lang.evaluate.EvaluatePackage;
 import org.jetbrains.jet.lang.psi.*;
 import org.jetbrains.jet.lang.resolve.*;
 import org.jetbrains.jet.lang.resolve.calls.CallExpressionResolver;
@@ -45,7 +46,10 @@ import org.jetbrains.jet.lang.resolve.calls.results.OverloadResolutionResults;
 import org.jetbrains.jet.lang.resolve.calls.results.OverloadResolutionResultsImpl;
 import org.jetbrains.jet.lang.resolve.calls.results.OverloadResolutionResultsUtil;
 import org.jetbrains.jet.lang.resolve.calls.util.CallMaker;
-import org.jetbrains.jet.lang.resolve.constants.*;
+import org.jetbrains.jet.lang.resolve.constants.CompileTimeConstant;
+import org.jetbrains.jet.lang.resolve.constants.CompileTimeConstantResolver;
+import org.jetbrains.jet.lang.resolve.constants.IntegerValueTypeConstructor;
+import org.jetbrains.jet.lang.resolve.constants.NumberValueTypeConstructor;
 import org.jetbrains.jet.lang.resolve.name.LabelName;
 import org.jetbrains.jet.lang.resolve.name.Name;
 import org.jetbrains.jet.lang.resolve.scopes.JetScope;
@@ -135,9 +139,9 @@ public class BasicExpressionTypingVisitor extends ExpressionTypingVisitor {
 
         if (noExpectedType(context.expectedType) && context.contextDependency == DEPENDENT) {
             if (elementType == JetNodeTypes.INTEGER_CONSTANT) {
-                Long longValue = CompileTimeConstantResolver.parseLong(text);
+                Long longValue = EvaluatePackage.parseLong(text);
                 if (longValue != null) {
-                    return createNumberValueTypeInfo(new IntegerValueTypeConstructor((long) longValue), longValue, context.dataFlowInfo);
+                    return createNumberValueTypeInfo(new IntegerValueTypeConstructor(longValue), longValue, context.dataFlowInfo);
                 }
             }
         }
