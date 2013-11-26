@@ -74,11 +74,13 @@ public class DeserializedClassDescriptor extends AbstractClassDescriptor impleme
     private final boolean isInner;
     private final InnerClassesScopeWrapper innerClassesScope;
     private final DescriptorFinder descriptorFinder;
+    private final PackageFragmentProvider packageFragmentProvider;
 
     public DeserializedClassDescriptor(
             @NotNull StorageManager storageManager,
             @NotNull AnnotationDeserializer annotationResolver,
             @NotNull DescriptorFinder descriptorFinder,
+            @NotNull PackageFragmentProvider packageFragmentProvider,
             @NotNull ClassData classData
     ) {
         super(classData.getNameResolver().getClassId(classData.getClassProto().getFqName()).getRelativeClassName().shortName());
@@ -86,6 +88,7 @@ public class DeserializedClassDescriptor extends AbstractClassDescriptor impleme
         this.classProto = classData.getClassProto();
 
         this.classId = nameResolver.getClassId(classProto.getFqName());
+        this.packageFragmentProvider = packageFragmentProvider;
         this.descriptorFinder = descriptorFinder;
 
         TypeDeserializer notNullTypeDeserializer = new TypeDeserializer(storageManager, null, nameResolver,
@@ -156,10 +159,15 @@ public class DeserializedClassDescriptor extends AbstractClassDescriptor impleme
 
     @NotNull
     private DeclarationDescriptor computeContainingDeclaration() {
-        ClassOrNamespaceDescriptor result = classId.isTopLevelClass() ?
-                                            descriptorFinder.findPackage(classId.getPackageFqName()) :
-                                            descriptorFinder.findClass(classId.getOuterClassId());
-        return result != null ? result : ErrorUtils.getErrorModule();
+        if (classId.isTopLevelClass()) {
+            List<PackageFragmentDescriptor> fragments = packageFragmentProvider.getPackageFragments(classId.getPackageFqName());
+            assert fragments.size() == 1 : "there should be exactly one package: " + fragments;
+            return fragments.iterator().next();
+        }
+        else {
+            ClassOrNamespaceDescriptor result = descriptorFinder.findClass(classId.getOuterClassId());
+            return result != null ? result : ErrorUtils.getErrorModule();
+        }
     }
 
     @NotNull

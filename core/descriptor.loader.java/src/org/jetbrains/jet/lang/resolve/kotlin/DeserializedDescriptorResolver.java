@@ -60,12 +60,6 @@ public final class DeserializedDescriptorResolver {
             return javaClassResolver.resolveClass(kotlinFqNameToJavaFqName(classId.asSingleFqName()), INCLUDE_KOTLIN_SOURCES);
         }
 
-        @Nullable
-        @Override
-        public PackageFragmentDescriptor findPackage(@NotNull FqName name) {
-            return javaPackageFragmentProvider.getOrCreatePackage(name);
-        }
-
         @NotNull
         @Override
         public Collection<Name> getClassNames(@NotNull FqName packageName) {
@@ -97,7 +91,7 @@ public final class DeserializedDescriptorResolver {
     public ClassDescriptor resolveClass(@NotNull KotlinJvmBinaryClass kotlinClass) {
         String[] data = readData(kotlinClass);
         return data == null ? null : new DeserializedClassDescriptor(storageManager, annotationDeserializer, javaDescriptorFinder,
-                                                                     JavaProtoBufUtil.readClassDataFrom(data));
+                                                                     javaPackageFragmentProvider, JavaProtoBufUtil.readClassDataFrom(data));
     }
 
     @Nullable
