@@ -174,15 +174,15 @@ public final class JavaClassResolver {
         List<Name> segments = qualifiedName.pathSegments();
         if (segments.size() < 2) return null;
 
-        JetScope scope = KotlinBuiltIns.getInstance().getBuiltInsScope();
-        for (int i = 1, size = segments.size(); i < size; i++) {
-            ClassifierDescriptor classifier = scope.getClassifier(segments.get(i));
+        ClassDescriptor klass = KotlinBuiltIns.getInstance().getBuiltInClassByName(segments.get(1));
+        for (int i = 2; i < segments.size(); i++) {
+            ClassifierDescriptor classifier = klass.getUnsubstitutedInnerClassesScope().getClassifier(segments.get(i));
             if (classifier == null) return null;
             assert classifier instanceof ClassDescriptor : "Unexpected classifier in built-ins: " + classifier;
-            scope = ((ClassDescriptor) classifier).getUnsubstitutedInnerClassesScope();
+            klass = (ClassDescriptor) classifier;
         }
 
-        return (ClassDescriptor) scope.getContainingDeclaration();
+        return klass;
     }
 
     private ClassDescriptor doResolveClass(@NotNull FqName qualifiedName, @NotNull PostponedTasks tasks) {

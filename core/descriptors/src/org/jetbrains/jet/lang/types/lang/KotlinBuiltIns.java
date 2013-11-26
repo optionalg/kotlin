@@ -29,7 +29,6 @@ import org.jetbrains.jet.lang.resolve.DescriptorUtils;
 import org.jetbrains.jet.lang.resolve.ImportPath;
 import org.jetbrains.jet.lang.resolve.name.FqName;
 import org.jetbrains.jet.lang.resolve.name.Name;
-import org.jetbrains.jet.lang.resolve.name.SpecialNames;
 import org.jetbrains.jet.lang.resolve.scopes.JetScope;
 import org.jetbrains.jet.lang.types.*;
 import org.jetbrains.jet.storage.LockBasedStorageManager;
@@ -228,9 +227,8 @@ public class KotlinBuiltIns {
         return builtInsModule.getPackageFragmentProvider().getPackageFragments(BUILT_INS_PACKAGE_FQ_NAME).get(0);
     }
 
-    @Deprecated
     @NotNull
-    public JetScope getBuiltInsScope() { // TODO 1 scope?
+    public JetScope getBuiltInsPackageScope() {
         return getBuiltInsPackageFragment().getMemberScope();
     }
 
@@ -242,7 +240,7 @@ public class KotlinBuiltIns {
 
     @NotNull
     public ClassDescriptor getBuiltInClassByName(@NotNull Name simpleName) {
-        ClassifierDescriptor classifier = getBuiltInsScope().getClassifier(simpleName);
+        ClassifierDescriptor classifier = getBuiltInsPackageFragment().getMemberScope().getClassifier(simpleName);
         assert classifier instanceof ClassDescriptor : "Must be a class descriptor " + simpleName + ", but was " + classifier;
         return (ClassDescriptor) classifier;
     }
