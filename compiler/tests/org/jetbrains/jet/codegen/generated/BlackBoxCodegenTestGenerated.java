@@ -743,6 +743,11 @@ public class BlackBoxCodegenTestGenerated extends AbstractBlackBoxCodegenTest {
             doTest("compiler/testData/codegen/box/classes/classObjectNotOfEnum.kt");
         }
         
+        @TestMetadata("classObjectToString.kt")
+        public void testClassObjectToString() throws Exception {
+            doTest("compiler/testData/codegen/box/classes/classObjectToString.kt");
+        }
+        
         @TestMetadata("classObjectWithPrivateGenericMember.kt")
         public void testClassObjectWithPrivateGenericMember() throws Exception {
             doTest("compiler/testData/codegen/box/classes/classObjectWithPrivateGenericMember.kt");
@@ -1336,6 +1341,11 @@ public class BlackBoxCodegenTestGenerated extends AbstractBlackBoxCodegenTest {
             @TestMetadata("localFunInsideLocalFunDifferentSignatures.kt")
             public void testLocalFunInsideLocalFunDifferentSignatures() throws Exception {
                 doTest("compiler/testData/codegen/box/closures/closureInsideClosure/localFunInsideLocalFunDifferentSignatures.kt");
+            }
+            
+            @TestMetadata("propertyAndFunctionNameClash.kt")
+            public void testPropertyAndFunctionNameClash() throws Exception {
+                doTest("compiler/testData/codegen/box/closures/closureInsideClosure/propertyAndFunctionNameClash.kt");
             }
             
             @TestMetadata("threeLevels.kt")
@@ -3521,6 +3531,11 @@ public class BlackBoxCodegenTestGenerated extends AbstractBlackBoxCodegenTest {
             doTest("compiler/testData/codegen/box/objects/methodOnObject.kt");
         }
         
+        @TestMetadata("nestedObjectWithSuperclass.kt")
+        public void testNestedObjectWithSuperclass() throws Exception {
+            doTest("compiler/testData/codegen/box/objects/nestedObjectWithSuperclass.kt");
+        }
+        
         @TestMetadata("objectLiteral.kt")
         public void testObjectLiteral() throws Exception {
             doTest("compiler/testData/codegen/box/objects/objectLiteral.kt");
@@ -3529,6 +3544,16 @@ public class BlackBoxCodegenTestGenerated extends AbstractBlackBoxCodegenTest {
         @TestMetadata("objectLiteralInClosure.kt")
         public void testObjectLiteralInClosure() throws Exception {
             doTest("compiler/testData/codegen/box/objects/objectLiteralInClosure.kt");
+        }
+        
+        @TestMetadata("objectWithSuperclass.kt")
+        public void testObjectWithSuperclass() throws Exception {
+            doTest("compiler/testData/codegen/box/objects/objectWithSuperclass.kt");
+        }
+        
+        @TestMetadata("objectWithSuperclassAndTrait.kt")
+        public void testObjectWithSuperclassAndTrait() throws Exception {
+            doTest("compiler/testData/codegen/box/objects/objectWithSuperclassAndTrait.kt");
         }
         
         @TestMetadata("receiverInConstructor.kt")
@@ -3725,6 +3750,11 @@ public class BlackBoxCodegenTestGenerated extends AbstractBlackBoxCodegenTest {
         @TestMetadata("kt3078.kt")
         public void testKt3078() throws Exception {
             doTest("compiler/testData/codegen/box/primitiveTypes/kt3078.kt");
+        }
+        
+        @TestMetadata("kt3517.kt")
+        public void testKt3517() throws Exception {
+            doTest("compiler/testData/codegen/box/primitiveTypes/kt3517.kt");
         }
         
         @TestMetadata("kt3576.kt")

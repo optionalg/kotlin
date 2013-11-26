@@ -424,7 +424,7 @@ public interface Errors {
 
     // Control flow / Data flow
 
-    DiagnosticFactory0<JetElement> UNREACHABLE_CODE = DiagnosticFactory0.create(ERROR);
+    DiagnosticFactory0<JetElement> UNREACHABLE_CODE = DiagnosticFactory0.create(WARNING);
 
     DiagnosticFactory0<JetVariableDeclaration> VARIABLE_WITH_NO_TYPE_NO_INITIALIZER = DiagnosticFactory0.create(ERROR, NAME_IDENTIFIER);
 
@@ -443,6 +443,7 @@ public interface Errors {
     DiagnosticFactory0<JetFunctionLiteralExpression> UNUSED_FUNCTION_LITERAL = DiagnosticFactory0.create(WARNING);
 
     DiagnosticFactory1<JetExpression, DeclarationDescriptor> VAL_REASSIGNMENT = DiagnosticFactory1.create(ERROR);
+    DiagnosticFactory1<JetExpression, DeclarationDescriptor> SETTER_PROJECTED_OUT = DiagnosticFactory1.create(ERROR);
 
     DiagnosticFactory1<JetExpression, DeclarationDescriptor> INITIALIZATION_BEFORE_DECLARATION = DiagnosticFactory1.create(ERROR);
 

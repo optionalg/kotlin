@@ -82,8 +82,7 @@ public class CodegenUtil {
                                     fd.getValueParameters(),
                                     fd.getReturnType(),
                                     Modality.FINAL,
-                                    Visibilities.PUBLIC,
-                                    /*isInline = */false
+                                    Visibilities.PUBLIC
         );
         return invokeDescriptor;
     }
@@ -292,7 +291,7 @@ public class CodegenUtil {
         ReceiverParameterDescriptor expectedThisObject = descriptor.getExpectedThisObject();
         if (expectedThisObject != null) {
             ClassDescriptor expectedThisClass = (ClassDescriptor) expectedThisObject.getContainingDeclaration();
-            if (!expectedThisClass.getKind().isObject()) {
+            if (!expectedThisClass.getKind().isSingleton()) {
                 return expectedThisClass;
             }
         }

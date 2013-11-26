@@ -39,6 +39,7 @@ import org.jetbrains.jet.lang.resolve.scopes.WritableScopeImpl;
 import org.jetbrains.jet.lang.types.*;
 import org.jetbrains.jet.lang.types.checker.JetTypeChecker;
 import org.jetbrains.jet.lang.types.expressions.ExpressionTypingServices;
+import org.jetbrains.jet.lang.types.lang.InlineStrategy;
 import org.jetbrains.jet.lang.types.lang.KotlinBuiltIns;
 import org.jetbrains.jet.lexer.JetKeywordToken;
 import org.jetbrains.jet.lexer.JetTokens;
@@ -339,8 +340,6 @@ public class DescriptorResolver {
         boolean hasBody = function.getBodyExpression() != null;
         Modality modality = resolveModalityFromModifiers(function, getDefaultModality(containingDescriptor, hasBody));
         Visibility visibility = resolveVisibilityFromModifiers(function, getDefaultVisibility(function, containingDescriptor));
-        JetModifierList modifierList = function.getModifierList();
-        boolean isInline = (modifierList != null) && modifierList.hasModifier(JetTokens.INLINE_KEYWORD);
         functionDescriptor.initialize(
                 receiverType,
                 getExpectedThisObjectIfNeeded(containingDescriptor),
@@ -348,8 +347,8 @@ public class DescriptorResolver {
                 valueParameterDescriptors,
                 returnType,
                 modality,
-                visibility,
-                isInline);
+                visibility
+        );
 
         BindingContextUtils.recordFunctionDeclarationToDescriptor(trace, function, functionDescriptor);
         return functionDescriptor;
@@ -380,8 +379,7 @@ public class DescriptorResolver {
                 Collections.<ValueParameterDescriptor>emptyList(),
                 returnType,
                 Modality.FINAL,
-                property.getVisibility(),
-                true
+                property.getVisibility()
         );
 
         trace.record(BindingContext.DATA_CLASS_COMPONENT_FUNCTION, parameter, functionDescriptor);
@@ -428,8 +426,7 @@ public class DescriptorResolver {
                 parameterDescriptors,
                 returnType,
                 Modality.FINAL,
-                classDescriptor.getVisibility(),
-                true
+                classDescriptor.getVisibility()
         );
 
         trace.record(BindingContext.DATA_CLASS_COPY_FUNCTION, classDescriptor, functionDescriptor);
@@ -1285,7 +1282,7 @@ public class DescriptorResolver {
                 classDescriptor,
                 valueParameter.getAnnotations(),
                 resolveModalityFromModifiers(parameter, Modality.FINAL),
-                resolveVisibilityFromModifiers(parameter),
+                resolveVisibilityFromModifiers(parameter, Visibilities.INTERNAL),
                 isMutable,
                 name,
                 CallableMemberDescriptor.Kind.DECLARATION

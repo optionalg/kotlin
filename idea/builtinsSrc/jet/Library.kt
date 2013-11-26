@@ -8,6 +8,13 @@ public annotation class data : Annotation
 public annotation class deprecated(value: String) : Annotation
 public annotation class suppress(vararg names: String)
 
+public annotation class noinline
+public annotation class inline(public val strategy: InlineStrategy = InlineStrategy.AS_FUNCTION)
+public enum class InlineStrategy {
+    AS_FUNCTION
+    IN_PLACE
+}
+
 public fun <R> synchronized(lock: Any, block : () -> R) : R
 
 public fun Any?.identityEquals(other : Any?) : Boolean // = this === other
@@ -29,7 +36,7 @@ public trait Hashable {
   public fun equals(other : Any?) : Boolean
 }
 
-public class Boolean {
+public class Boolean private () {
   public fun not() : Boolean
 
   public fun and(other : Boolean) : Boolean
