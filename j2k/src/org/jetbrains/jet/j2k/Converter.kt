@@ -30,9 +30,6 @@ import java.util.*
 import com.intellij.psi.CommonClassNames.*
 import org.jetbrains.jet.lang.types.expressions.OperatorConventions.*
 import com.intellij.psi.util.PsiUtil
-import org.jetbrains.jet.lang.resolve.name.FqName
-import org.jetbrains.jet.util.QualifiedNamesUtil
-import org.jetbrains.jet.lang.resolve.java.mapping.JavaToKotlinClassMap
 import com.intellij.openapi.project.Project
 
 public class Converter(val project: Project, val settings: ConverterSettings) {
@@ -69,6 +66,7 @@ public class Converter(val project: Project, val settings: ConverterSettings) {
         is PsiStatement -> statementToStatement(element)
         is PsiExpression -> expressionToExpression(element)
         is PsiComment -> Comment(element.getText()!!)
+        is PsiWhiteSpace -> WhiteSpace(element.getText()!!)
         is PsiImportList -> importsToImportList(element)
         is PsiImportStatementBase -> importToImport(element)
         else -> null
@@ -148,7 +146,7 @@ public class Converter(val project: Project, val settings: ConverterSettings) {
             for (m in members) {
                 if (m is Constructor) {
                     if (!m.isPrimary) {
-                        for (fo in finalOrWithEmptyInitializer){
+                        for (fo in finalOrWithEmptyInitializer) {
                             val init = getDefaultInitializer(fo)
                             initializers.put(fo.identifier.toKotlin(), init)
                         }

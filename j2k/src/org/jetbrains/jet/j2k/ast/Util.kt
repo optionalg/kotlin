@@ -21,10 +21,16 @@ fun List<Node>.toKotlin(separator: String, prefix: String = "", suffix: String =
     if (size() > 0) {
         result.append(prefix)
         var first = true
-        for (x in this) {
-            if (!first) result.append(separator)
-            first = false
-            result.append(x.toKotlin())
+        for (i in indices) {
+            val elem = get(i)
+            val next = if ((i + 1) in indices) get(i + 1) else null
+            if (!first && (elem !is WhiteSpace && next !is WhiteSpace)){
+                result.append(separator)
+            }
+            if (elem !is WhiteSpace) {
+                first = false
+            }
+            result.append(elem.toKotlin())
         }
         result.append(suffix)
     }
