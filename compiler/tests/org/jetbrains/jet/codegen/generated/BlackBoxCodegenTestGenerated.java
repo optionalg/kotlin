@@ -3541,6 +3541,11 @@ public class BlackBoxCodegenTestGenerated extends AbstractBlackBoxCodegenTest {
             doTest("compiler/testData/codegen/box/objects/objectLiteralInClosure.kt");
         }
         
+        @TestMetadata("objectWithSuper.kt")
+        public void testObjectWithSuper() throws Exception {
+            doTest("compiler/testData/codegen/box/objects/objectWithSuper.kt");
+        }
+        
         @TestMetadata("receiverInConstructor.kt")
         public void testReceiverInConstructor() throws Exception {
             doTest("compiler/testData/codegen/box/objects/receiverInConstructor.kt");
