@@ -488,7 +488,7 @@ private val STRING = CompileTimeType<String>()
 private val ANY = CompileTimeType<Any>()
 
 [suppress("UNCHECKED_CAST")]
-private fun <A, B> bOp(
+private fun <A, B> binaryOperationKey(
         a: CompileTimeType<A>,
         b: CompileTimeType<B>,
         functionName: String,
@@ -496,7 +496,7 @@ private fun <A, B> bOp(
 ) = BinaryOperationKey(a, b, functionName) to f as Function2<Any?, Any?, Any>
 
 [suppress("UNCHECKED_CAST")]
-private fun <A> uOp(
+private fun <A> unaryOperationKey(
         a: CompileTimeType<A>,
         functionName: String,
         f: (A) -> Any

@@ -74,7 +74,7 @@ fun generate(): String {
     while (unaryOperationsMapIterator.hasNext()) {
         val (funcName, parameters) = unaryOperationsMapIterator.next()
         p.print(
-                "uOp(",
+                "unaryOperationKey(",
                 parameters.makeString(", "),
                 ", ",
                 "\"$funcName\"",
@@ -98,7 +98,7 @@ fun generate(): String {
     while (binaryOperationsMapIterator.hasNext()) {
         val (funcName, parameters) = binaryOperationsMapIterator.next()
         p.print(
-                "bOp(",
+                "binaryOperationKey(",
                 parameters.makeString(", "),
                 ", ",
                 "\"$funcName\"",
