@@ -22,10 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.jet.di.InjectorForTopDownAnalyzerBasic;
 import org.jetbrains.jet.lang.PlatformToKotlinClassMap;
 import org.jetbrains.jet.lang.descriptors.*;
-import org.jetbrains.jet.lang.descriptors.impl.MutableClassDescriptor;
-import org.jetbrains.jet.lang.descriptors.impl.MutableClassDescriptorLite;
-import org.jetbrains.jet.lang.descriptors.impl.NamespaceLikeBuilder;
-import org.jetbrains.jet.lang.descriptors.impl.NamespaceLikeBuilderDummy;
+import org.jetbrains.jet.lang.descriptors.impl.*;
 import org.jetbrains.jet.lang.psi.JetClassOrObject;
 import org.jetbrains.jet.lang.psi.JetFile;
 import org.jetbrains.jet.lang.resolve.name.FqName;
@@ -39,7 +36,6 @@ import javax.inject.Inject;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class TopDownAnalyzer {
 
@@ -146,10 +142,8 @@ public class TopDownAnalyzer {
         for (MutableClassDescriptor mutableClassDescriptor : context.getObjects().values()) {
             mutableClassDescriptor.lockScopes();
         }
-        for (Map.Entry<JetFile, WritableScope> namespaceScope : context.getNamespaceScopes().entrySet()) {
-            // todo: this is hack in favor of REPL
-            if(!namespaceScope.getKey().isScript())
-                namespaceScope.getValue().changeLockLevel(WritableScope.LockLevel.READING);
+        for (MutablePackageFragmentDescriptor fragment : packageFragmentProvider.getAllFragments()) {
+            fragment.getMemberScope().changeLockLevel(WritableScope.LockLevel.READING);
         }
     }
 
