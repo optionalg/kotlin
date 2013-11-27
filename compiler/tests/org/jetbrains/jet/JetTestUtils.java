@@ -651,18 +651,6 @@ public class JetTestUtils {
         return new ModuleDescriptorImpl(Name.special(name), Collections.<ImportPath>emptyList(), PlatformToKotlinClassMap.EMPTY);
     }
 
-    // TODO 1 review it 'n' remove it
-    //@NotNull
-    //public static NamespaceDescriptorImpl createTestNamespace(@NotNull Name testPackageName) {
-    //    ModuleDescriptorImpl module = AnalyzerFacadeForJVM.createJavaModule("<test module>");
-    //    NamespaceDescriptorImpl rootNamespace =
-    //            new NamespaceDescriptorImpl(module, Collections.<AnnotationDescriptor>emptyList(), DescriptorUtils.ROOT_NAMESPACE_NAME);
-    //    module.setRootNamespace(rootNamespace);
-    //    NamespaceDescriptorImpl test = new NamespaceDescriptorImpl(rootNamespace, Collections.<AnnotationDescriptor>emptyList(), testPackageName);
-    //    test.initialize(new WritableScopeImpl(JetScope.EMPTY, test, RedeclarationHandler.DO_NOTHING, "members of test namespace"));
-    //    return test;
-    //}
-
     @NotNull
     public static MutablePackageFragmentDescriptor createTestPackageFragment(@NotNull Name testPackageName) {
         return createTestPackageFragment(testPackageName, "<test module>");
