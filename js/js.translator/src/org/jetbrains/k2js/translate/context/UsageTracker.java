@@ -170,7 +170,7 @@ public final class UsageTracker {
             @NotNull DeclarationDescriptor ancestor,
             @NotNull DeclarationDescriptor declarationDescriptor
     ) {
-        DeclarationDescriptor descriptor = declarationDescriptor.getContainingDeclaration();
+        DeclarationDescriptor descriptor = declarationDescriptor;
         while (descriptor != null && !(descriptor instanceof NamespaceDescriptor)) {
             if (ancestor == descriptor) {
                 return true;

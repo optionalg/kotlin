@@ -101,8 +101,12 @@ public class LiteralFunctionTranslator extends AbstractTranslator {
             asInner = DescriptorUtils.isTopLevelDeclaration(descriptor);
         }
 
-        funContext = outerContext.newFunctionBody(fun, aliasingContext,
-                                                  new UsageTracker(descriptor, outerContext.usageTracker(), outerClass));
+        UsageTracker funUsageTracker = new UsageTracker(descriptor, outerContext.usageTracker(), outerClass);
+        funContext = outerContext.newFunctionBody(fun, aliasingContext, funUsageTracker);
+        JsNameRef funRef = createReference(fun);
+
+        // for recursive calls
+        funContext.aliasingContext().registerAlias(descriptor, funRef);
 
         fun.getBody().getStatements().addAll(translateFunctionBody(descriptor, declaration, funContext).getStatements());
 
@@ -127,7 +131,7 @@ public class LiteralFunctionTranslator extends AbstractTranslator {
             return fun;
         }
 
-        JsExpression result = translator.translate(createReference(fun), outerContext);
+        JsExpression result = translator.translate(funRef, outerContext);
         addRegularParameters(descriptor, fun, funContext, receiverName);
         return result;
     }
