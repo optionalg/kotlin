@@ -17,6 +17,7 @@
 package org.jetbrains.jet.lang.resolve;
 
 import com.google.common.base.Predicates;
+import com.google.common.collect.Sets;
 import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.jet.di.InjectorForTopDownAnalyzerBasic;
@@ -25,6 +26,7 @@ import org.jetbrains.jet.lang.descriptors.*;
 import org.jetbrains.jet.lang.descriptors.impl.*;
 import org.jetbrains.jet.lang.psi.JetClassOrObject;
 import org.jetbrains.jet.lang.psi.JetFile;
+import org.jetbrains.jet.lang.psi.JetPsiUtil;
 import org.jetbrains.jet.lang.resolve.name.FqName;
 import org.jetbrains.jet.lang.resolve.name.Name;
 import org.jetbrains.jet.lang.resolve.scopes.JetScope;
@@ -36,6 +38,7 @@ import javax.inject.Inject;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 public class TopDownAnalyzer {
 
@@ -142,8 +145,15 @@ public class TopDownAnalyzer {
         for (MutableClassDescriptor mutableClassDescriptor : context.getObjects().values()) {
             mutableClassDescriptor.lockScopes();
         }
+        Set<FqName> scriptFqNames = Sets.newHashSet();
+        for (JetFile file : context.getNamespaceScopes().keySet()) {
+            scriptFqNames.add(JetPsiUtil.getFQName(file));
+        }
         for (MutablePackageFragmentDescriptor fragment : packageFragmentProvider.getAllFragments()) {
-            fragment.getMemberScope().changeLockLevel(WritableScope.LockLevel.READING);
+            // todo: this is hack in favor of REPL
+            if (!scriptFqNames.contains(fragment.getFqName())) {
+                fragment.getMemberScope().changeLockLevel(WritableScope.LockLevel.READING);
+            }
         }
     }
 
