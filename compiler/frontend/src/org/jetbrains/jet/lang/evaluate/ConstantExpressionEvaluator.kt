@@ -34,6 +34,9 @@ import org.jetbrains.jet.lang.types.TypeUtils
 import org.jetbrains.jet.lang.resolve.calls.model.ResolvedValueArgument
 import org.jetbrains.jet.JetNodeTypes
 import java.lang.Long.parseLong as javaParseLong
+import java.math.BigInteger
+import org.jetbrains.jet.lang.diagnostics.Errors
+import com.intellij.psi.util.PsiTreeUtil
 
 [suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")]
 public class ConstantExpressionEvaluator private (val trace: BindingTrace) : JetVisitor<CompileTimeConstant<*>, JetType>() {
@@ -186,12 +189,31 @@ public class ConstantExpressionEvaluator private (val trace: BindingTrace) : Jet
             val argumentForParameter = createOperationArgumentForFirstParameter(argument, parameter)
             if (argumentForParameter == null) return null
 
-            val function = binaryOperations[BinaryOperationKey(argumentForReceiver.ctcType, argumentForParameter.ctcType, resultingDescriptorName)]
-            if (function == null) return null
-            return function(argumentForReceiver.value, argumentForParameter.value)
+            return evaluateAndCheck(argumentForReceiver, argumentForParameter, resultingDescriptorName, callExpression)
         }
 
         return null
+    }
+
+    private fun evaluateAndCheck(receiver: OperationArgument, parameter: OperationArgument, name: String, callExpression: JetExpression): Any? {
+        val functions = binaryOperations[BinaryOperationKey(receiver.ctcType, parameter.ctcType, name)]
+        if (functions == null) return null
+
+        val (function, check)  = functions
+        val realResult = function(receiver.value, parameter.value)
+        if (check == emptyFun) {
+            return realResult
+        }
+        assert (isIntegerType(receiver.value) && isIntegerType(parameter.value)) { "Only integer constants should be checked for overflow" }
+        val receiverAsBigInteger = BigInteger.valueOf((receiver.value as Number).toLong())
+        val parameterAsBigInteger = BigInteger.valueOf((parameter.value as Number).toLong())
+        val resultInBigIntegers = check(receiverAsBigInteger, parameterAsBigInteger)
+
+        if (BigInteger.valueOf((realResult as Number).toLong()).compareTo(resultInBigIntegers) != 0) {
+            val a = PsiTreeUtil.getParentOfType(callExpression, javaClass<JetExpression>())
+            trace.report(Errors.INTEGER_OVERFLOW.on(PsiTreeUtil.getParentOfType(callExpression, javaClass<JetExpression>()) ?: callExpression))
+        }
+        return realResult
     }
 
     override fun visitUnaryExpression(expression: JetUnaryExpression, expectedType: JetType?): CompileTimeConstant<*>? {
@@ -415,6 +437,8 @@ public fun createCompileTimeConstant(value: Any?, expectedType: JetType?): Compi
     }
 }
 
+fun isIntegerType(value: Any?) = value is Byte || value is Short || value is Int || value is Long
+
 private fun getIntegerValue(value: Long, expectedType: JetType): CompileTimeConstant<*>? {
     fun defaultIntegerValue(value: Long) = when (value) {
         value.toInt().toLong() -> IntValue(value.toInt())
@@ -492,8 +516,8 @@ private fun <A, B> binaryOperationKey(
         a: CompileTimeType<A>,
         b: CompileTimeType<B>,
         functionName: String,
-        f: (A, B) -> Any
-) = BinaryOperationKey(a, b, functionName) to f as Function2<Any?, Any?, Any>
+        pair: Pair<Function2<A, B, Any>, Function2<BigInteger, BigInteger, BigInteger>>
+) = BinaryOperationKey(a, b, functionName) to pair as Pair<Function2<Any?, Any?, Any>, Function2<BigInteger, BigInteger, BigInteger>>
 
 [suppress("UNCHECKED_CAST")]
 private fun <A> unaryOperationKey(
@@ -504,3 +528,4 @@ private fun <A> unaryOperationKey(
 
 private data class BinaryOperationKey<A, B>(val f: CompileTimeType<out A>, val s: CompileTimeType<out B>, val functionName: String)
 private data class UnaryOperationKey<A>(val f: CompileTimeType<out A>, val functionName: String)
+
