@@ -51,6 +51,9 @@ public class ModuleDescriptorImpl extends DeclarationDescriptorImpl implements M
     }
 
     public void addFragmentProvider(@NotNull PackageFragmentProvider provider) {
+        if (fragmentProviders.contains(provider)) {
+            throw new IllegalStateException("Trying to add already present fragment provider: " + provider);
+        }
         fragmentProviders.add(provider);
     }
 

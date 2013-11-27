@@ -124,6 +124,12 @@ public class InjectorForTopDownAnalyzerForJvm implements InjectorForTopDownAnaly
     private final JavaTypeTransformer javaTypeTransformer;
     private final DeserializedDescriptorResolver deserializedDescriptorResolver;
     private final AnnotationDescriptorDeserializer annotationDescriptorDeserializer;
+
+    // TODO move into gen
+    public JavaPackageFragmentProvider getJavaPackageFragmentProvider() {
+        return javaPackageFragmentProvider;
+    }
+
     private final JavaPackageFragmentProvider javaPackageFragmentProvider;
     private final JavaMemberResolver javaMemberResolver;
     private final JavaConstructorResolver javaConstructorResolver;

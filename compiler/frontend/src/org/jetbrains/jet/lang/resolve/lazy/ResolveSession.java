@@ -133,8 +133,6 @@ public class ResolveSession implements KotlinCodeAnalyzer {
 
         this.declarationProviderFactory = declarationProviderFactory;
 
-        rootDescriptor.addFragmentProvider(KotlinBuiltIns.getInstance().getBuiltInsModule().getPackageFragmentProvider());
-
         this.packageFragmentProvider = new PackageFragmentProvider() {
             @NotNull
             @Override

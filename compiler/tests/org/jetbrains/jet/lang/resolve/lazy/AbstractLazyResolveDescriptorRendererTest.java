@@ -48,9 +48,6 @@ public abstract class AbstractLazyResolveDescriptorRendererTest extends KotlinTe
     }
 
     protected void doTest(@NotNull String testFile) throws IOException {
-
-        InjectorForTopDownAnalyzer injectorForTopDownAnalyzer = LazyResolveTestUtil.getEagerInjectorForTopDownAnalyzer(getEnvironment());
-
         JetFile psiFile = JetPsiFactory.createFile(getProject(), FileUtil.loadFile(new File(testFile), true));
         Collection<JetFile> files = Lists.newArrayList(psiFile);
 

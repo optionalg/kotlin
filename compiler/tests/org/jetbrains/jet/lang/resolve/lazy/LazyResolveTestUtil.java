@@ -63,7 +63,11 @@ public class LazyResolveTestUtil {
         CliLightClassGenerationSupport support = CliLightClassGenerationSupport.getInstanceForCli(environment.getProject());
         BindingTrace sharedTrace = support.getTrace();
         ModuleDescriptorImpl sharedModule = support.getModule();
-        return new InjectorForTopDownAnalyzerForJvm(environment.getProject(), params, sharedTrace, sharedModule);
+
+        InjectorForTopDownAnalyzerForJvm injector =
+                new InjectorForTopDownAnalyzerForJvm(environment.getProject(), params, sharedTrace, sharedModule);
+        sharedModule.addFragmentProvider(injector.getJavaPackageFragmentProvider());
+        return injector;
     }
 
     public static ModuleDescriptor resolveEagerly(List<JetFile> files, JetCoreEnvironment environment) {

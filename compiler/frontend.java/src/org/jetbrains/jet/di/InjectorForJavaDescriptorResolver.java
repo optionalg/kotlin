@@ -195,6 +195,8 @@ public class InjectorForJavaDescriptorResolver {
 
         javaClassFinder.initialize();
 
+        // TODO hack in generated code: manually adding package fragment provider
+        module.addFragmentProvider(javaPackageFragmentProvider);
     }
     
     @PreDestroy

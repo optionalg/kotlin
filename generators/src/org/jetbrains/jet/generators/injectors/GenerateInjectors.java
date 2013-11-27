@@ -129,6 +129,7 @@ public class GenerateInjectors {
         generator.addField(VirtualFileKotlinClassFinder.class);
         generator.addField(MutablePackageFragmentProvider.class);
         generator.addField(NamespaceFactoryImpl.class);
+        generator.addPublicField(JavaPackageFragmentProvider.class);
         generator.addField(false, VirtualFileFinder.class, "virtualFileFinder",
                            new GivenExpression(
                                    "com.intellij.openapi.components.ServiceManager.getService(project, VirtualFileFinder.class)"));
@@ -138,6 +139,7 @@ public class GenerateInjectors {
     }
 
     private static DependencyInjectorGenerator generateInjectorForJavaDescriptorResolver() throws IOException {
+        // TODO hack in generated code: manually adding package fragment provider
         DependencyInjectorGenerator generator = new DependencyInjectorGenerator();
 
         // Parameters
