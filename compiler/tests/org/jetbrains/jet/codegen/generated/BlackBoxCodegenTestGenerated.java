@@ -2522,6 +2522,11 @@ public class BlackBoxCodegenTestGenerated extends AbstractBlackBoxCodegenTest {
             doTest("compiler/testData/codegen/box/functions/prefixRecursiveCall.kt");
         }
         
+        @TestMetadata("recursiveCompareTo.kt")
+        public void testRecursiveCompareTo() throws Exception {
+            doTest("compiler/testData/codegen/box/functions/recursiveCompareTo.kt");
+        }
+        
         @TestMetadata("compiler/testData/codegen/box/functions/invoke")
         public static class Invoke extends AbstractBlackBoxCodegenTest {
             public void testAllFilesPresentInInvoke() throws Exception {
