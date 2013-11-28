@@ -3013,14 +3013,16 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
         }
         else {
             DeclarationDescriptor cls = op.getContainingDeclaration();
-            CallableMethod callableMethod = (CallableMethod) callable;
+            ResolvedCall<? extends CallableDescriptor> resolvedCall =
+                    bindingContext.get(BindingContext.RESOLVED_CALL, expression.getOperationReference());
+            assert resolvedCall != null;
+
             if (isPrimitiveNumberClassDescriptor(cls) || !(op.getName().asString().equals("inc") || op.getName().asString().equals("dec"))) {
-                return invokeOperation(expression, (FunctionDescriptor) op, callableMethod);
+                Call call = bindingContext.get(BindingContext.CALL, expression.getOperationReference());
+                return invokeFunction(call, receiver, resolvedCall);
             }
             else {
-                ResolvedCall<? extends CallableDescriptor> resolvedCall =
-                        bindingContext.get(BindingContext.RESOLVED_CALL, expression.getOperationReference());
-                assert resolvedCall != null;
+                CallableMethod callableMethod = (CallableMethod) callable;
 
                 StackValue value = gen(expression.getBaseExpression());
                 value.dupReceiver(v);
