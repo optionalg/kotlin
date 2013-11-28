@@ -2638,7 +2638,8 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
 
     @Override
     public StackValue visitBinaryExpression(@NotNull JetBinaryExpression expression, StackValue receiver) {
-        IElementType opToken = expression.getOperationReference().getReferencedNameElementType();
+        JetSimpleNameExpression reference = expression.getOperationReference();
+        IElementType opToken = reference.getReferencedNameElementType();
         if (opToken == JetTokens.EQ) {
             return generateAssignmentExpression(expression);
         }
@@ -2666,7 +2667,10 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
             return generateIn(expression);
         }
         else {
-            DeclarationDescriptor op = bindingContext.get(BindingContext.REFERENCE_TARGET, expression.getOperationReference());
+            ResolvedCall<? extends CallableDescriptor> resolvedCall = bindingContext.get(BindingContext.RESOLVED_CALL, reference);
+            Call call = bindingContext.get(BindingContext.CALL, reference);
+
+            DeclarationDescriptor op = bindingContext.get(BindingContext.REFERENCE_TARGET, reference);
             assert op instanceof FunctionDescriptor : String.valueOf(op);
             Callable callable = resolveToCallable((FunctionDescriptor) op, false);
             if (callable instanceof IntrinsicMethod) {
@@ -2675,7 +2679,7 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
                                           Arrays.asList(expression.getLeft(), expression.getRight()), receiver, state);
             }
             else {
-                return invokeOperation(expression, (FunctionDescriptor) op, (CallableMethod) callable);
+                return invokeFunction(call, receiver, resolvedCall);
             }
         }
     }
