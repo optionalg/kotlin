@@ -12,7 +12,7 @@ fun Array<String>.test1Nested(): Array<String> {
 fun Array<String>.test2() : Array<String> {
     class Z2() {
         fun run(): Array<String> {
-            this@test2
+            return this@test2
         }
     }
     return Z2().run()
